@@ -1,0 +1,92 @@
+:root {
+  /* Colors - Luxury Dark Theme */
+  --bg-color: #080706;               /* Warm Charcoal Black */
+  --text-primary: #ECE9E4;           /* Luxury Cream/Off-White */
+  --text-secondary: #9E9990;         /* Muted Warm Gray */
+  --text-tertiary: #5E5A52;          /* Dark Slate Gray */
+  
+  --primary-color: #ECE9E4;          /* Main Action Color (Cream) */
+  --primary-hover: #FFFFFF;          /* Pure White on Hover */
+  --primary-light: rgba(236, 233, 228, 0.06);
+  
+  --accent-color: #E6C587;           /* Premium Brushed Champagne Gold */
+  --accent-light: #1E1B17;           /* Dark Metallic Gold-Black */
+  --accent-soft: rgba(230, 197, 135, 0.08);
+  --accent-glow: rgba(230, 197, 135, 0.25);
+  
+  --success-color: #89A884;          /* Soft Sage Green */
+  --success-soft: rgba(137, 168, 132, 0.08);
+  --error-color: #D29486;            /* Soft Terracotta Red */
+  --error-soft: rgba(210, 148, 134, 0.08);
+  
+  /* Font & Spacing */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-tight: -0.02em;
+  
+  /* Border Radiuses */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
+  --radius-full: 9999px;
+  
+  /* 
+     Claymorphism + Glassmorphism Hybrid Shadows (Luxury Dark Theme)
+     Outer: Large diffuse ambient drop shadows + sharp edge drop shadow.
+     Inner: 1px specular white border highlight (simulates glass edge refraction) + dark bottom inner shadow.
+  */
+  --clay-bg: rgba(20, 18, 16, 0.65); /* Glass-Clay Semi-Transparent Backing */
+  
+  --clay-shadow-outer: 
+    0px 4px 10px rgba(0, 0, 0, 0.4),
+    0px 24px 64px rgba(0, 0, 0, 0.75),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.14); /* Refraction border */
+  
+  --clay-shadow-inner: 
+    inset 1px 1px 1px rgba(255, 255, 255, 0.08), 
+    inset -2px -2px 6px rgba(0, 0, 0, 0.4);
+
+  /* Hover Lift State */
+  --clay-shadow-lifted-outer: 
+    0px 8px 20px rgba(0, 0, 0, 0.5),
+    0px 32px 80px rgba(0, 0, 0, 0.85),
+    inset 1px 1px 0px rgba(255, 255, 255, 0.22);
+  
+  --clay-shadow-lifted-inner: 
+    inset 2px 2px 2px rgba(255, 255, 255, 0.12), 
+    inset -3px -3px 8px rgba(0, 0, 0, 0.4);
+
+  /* Sunken State (for Input Boxes) */
+  --clay-shadow-sunken: 
+    inset 2px 2px 6px rgba(0, 0, 0, 0.6), 
+    inset -1px -1px 2px rgba(255, 255, 255, 0.04),
+    0px 1px 1px rgba(255, 255, 255, 0.02);
+    
+  /* Tactile Glass Buttons */
+  --clay-btn-shadow:
+    0px 4px 12px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.08),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+
+  --clay-btn-hover-shadow:
+    0px 8px 18px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+
+  --clay-btn-active-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+    0px 1px 1px rgba(255, 255, 255, 0.03);
+    
+  /* Animated Ambient Lights (Luxury Deep Tones) */
+  --glow-circle-1: rgba(140, 110, 80, 0.18);   /* Dark Almond Gold */
+  --glow-circle-2: rgba(90, 60, 110, 0.22);    /* Velvet Deep Purple */
+  --glow-circle-3: rgba(230, 197, 135, 0.12);   /* Soft Gold Backlighting */
+  
+  /* Transitions */
+  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-bounce: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

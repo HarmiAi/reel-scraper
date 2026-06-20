@@ -1,0 +1,169 @@
+/* Global Reset & Base Setup */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.5;
+}
+
+/* Custom Luxury Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Premium Noise Grain Overlay */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.025; /* Muted for dark theme subtleness */
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Background Particle Canvas */
+.particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1; /* Behind content, on top of ambient lighting */
+}
+
+/* Floating Ambient Lights */
+.ambient-glow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.glow-circle {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(160px);
+  opacity: 0.65;
+}
+
+.glow-circle-1 {
+  top: -10%;
+  left: 10%;
+  width: 50vw;
+  height: 50vw;
+  background-color: var(--glow-circle-1);
+  animation: drift-light-1 25s infinite ease-in-out;
+}
+
+.glow-circle-2 {
+  bottom: -15%;
+  right: 5%;
+  width: 60vw;
+  height: 60vw;
+  background-color: var(--glow-circle-2);
+  animation: drift-light-2 30s infinite ease-in-out;
+}
+
+.glow-circle-3 {
+  top: 35%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  width: 45vw;
+  height: 45vw;
+  background-color: var(--glow-circle-3);
+  opacity: 0.4;
+}
+
+/* Layout System */
+.app-container {
+  position: relative;
+  z-index: 2; /* Sits securely on top of canvas and ambient glows */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1.5rem 4rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Typography Hierarchy */
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+h3 {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+p {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Helper Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: clamp(1.1rem, 1.8vw, 1.25rem);
+  max-width: 600px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
