@@ -240,27 +240,41 @@ export const downloadProxy = async (req, res, next) => {
 
     if (localFilePath && fs.existsSync(localFilePath)) {
       console.log(`[DownloadProxy] Serving pre-transcoded file: ${localFilePath}`);
-      
-      const stats = fs.statSync(localFilePath);
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Type', 'video/mp4');
-      res.setHeader('Content-Length', stats.size);
-
-      const fileStream = fs.createReadStream(localFilePath);
-      fileStream.pipe(res);
-
-      res.on('finish', () => {
-        console.log(`[DownloadProxy] Finished serving ${localFilePath}. Deleting...`);
-        fs.unlink(localFilePath, (err) => {
-          if (err) console.error(`[DownloadProxy] Failed to delete ${localFilePath}:`, err.message);
-        });
+      return res.download(localFilePath, filename, (err) => {
+        if (err) {
+          console.error(`[DownloadProxy] Error serving file:`, err.message);
+        } else {
+          console.log(`[DownloadProxy] Successfully served ${localFilePath}`);
+        }
+        // Set a timeout of 15 seconds before deleting the file.
+        // This avoids race conditions with range requests/connection retries from browser download managers.
+        setTimeout(() => {
+          fs.unlink(localFilePath, (unlinkErr) => {
+            if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+              console.error(`[DownloadProxy] Failed to delete ${localFilePath}:`, unlinkErr.message);
+            } else if (!unlinkErr) {
+              console.log(`[DownloadProxy] Cleaned up file: ${localFilePath}`);
+            }
+          });
+        }, 15000);
       });
-      return;
     }
 
-    // Fallback: If local pre-transcoded file is missing, transcode on-the-fly from the CDN URL
+    // Fallback: If local pre-transcoded file is missing, stream/transcode from the CDN URL
     if (!url) {
       return res.status(404).send('Transcoded file not found, and no fallback CDN URL was provided.');
+    }
+
+    if (qualityKey === 'high') {
+      console.log(`[DownloadProxy] Pre-transcoded high file missing. Streaming original CDN URL directly.`);
+      const mediaResponse = await fetch(url);
+      if (!mediaResponse.ok) {
+        throw new Error(`CDN returned status ${mediaResponse.status}: ${mediaResponse.statusText}`);
+      }
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', mediaResponse.headers.get('content-type') || 'video/mp4');
+      const nodeStream = Readable.fromWeb(mediaResponse.body);
+      return nodeStream.pipe(res);
     }
 
     console.log(`[DownloadProxy] Pre-transcoded file not found. Falling back to on-the-fly transcoding for ${targetQuality}...`);
