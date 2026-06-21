@@ -39,6 +39,10 @@ import HowItWorks from './components/HowItWorks.jsx';
 import AnimatedCounter from './components/AnimatedCounter.jsx';
 import SkeletonLoader from './components/SkeletonLoader.jsx';
 import ErrorState from './components/ErrorState.jsx';
+import UnlockModal from './components/UnlockModal.jsx';
+import MobileActionSheet from './components/MobileActionSheet.jsx';
+import DownloadSuccessScreen from './components/DownloadSuccessScreen.jsx';
+import AnalyticsCards from './components/AnalyticsCards.jsx';
 
 // GPU-Accelerated 3D Parallax Canvas Particles System
 const CanvasParticles = () => {
@@ -154,6 +158,16 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [errorDetails, setErrorDetails] = useState(null);
 
+  // Phase 2 enhancements
+  const [stats, setStats] = useState({ total: 0, hd: 0, sd: 0 });
+  const [pendingQuality, setPendingQuality] = useState(null); // { key, label }
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const [downloadSuccessData, setDownloadSuccessData] = useState(null); // { reelData, qualityName }
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterQuality, setFilterQuality] = useState('ALL'); // 'ALL' | 'BEST' | 'HD' | 'SD'
+
   const mascotRef = useRef(null);
 
   // Load history from localStorage
@@ -168,6 +182,18 @@ function App() {
     }
   }, []);
 
+  // Load stats from localStorage
+  useEffect(() => {
+    try {
+      const storedStats = localStorage.getItem('lumina_download_stats');
+      if (storedStats) {
+        setStats(JSON.parse(storedStats));
+      }
+    } catch (e) {
+      console.error("Failed to load stats", e);
+    }
+  }, []);
+
   // Save history helper
   const saveHistory = (updatedHistory) => {
     setHistory(updatedHistory);
@@ -175,6 +201,16 @@ function App() {
       localStorage.setItem('lumina_reel_history', JSON.stringify(updatedHistory));
     } catch (e) {
       console.error("Failed to save history", e);
+    }
+  };
+
+  // Save stats helper
+  const saveStats = (updatedStats) => {
+    setStats(updatedStats);
+    try {
+      localStorage.setItem('lumina_download_stats', JSON.stringify(updatedStats));
+    } catch (e) {
+      console.error("Failed to save stats", e);
     }
   };
 
@@ -257,6 +293,27 @@ function App() {
     return 'invalid_url';
   };
 
+  // Helper to calculate file sizes dynamically
+  const calculateSize = (durationStr, quality) => {
+    let durationSec = 15; // default
+    try {
+      if (durationStr) {
+        const parts = durationStr.split(':').map(Number);
+        if (parts.length === 2) {
+          durationSec = parts[0] * 60 + parts[1];
+        }
+      }
+    } catch (e) {}
+
+    let bitrate = 1.2; // SD: 1.2 Mbps
+    if (quality === 'HD') bitrate = 2.4; // HD: 2.4 Mbps
+    if (quality === 'BEST') bitrate = 4.8; // Best: 4.8 Mbps
+
+    const sizeBytes = (durationSec * bitrate * 1024 * 1024) / 8;
+    const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(1);
+    return `${sizeMB} MB`;
+  };
+
   // Submit Handler calling real API
   const handleDownloadSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -311,6 +368,7 @@ function App() {
     setProgressStep('Analyzing Reel...');
     setReelData(null);
     setErrorDetails(null);
+    setDownloadSuccessData(null);
     setIsPlayingPreview(false);
 
     // Dynamic extraction simulation ticks to keep the custom 3D morphing loader responsive
@@ -366,6 +424,11 @@ function App() {
         ].slice(0, 20);
         
         saveHistory(updatedHistory);
+
+        // Slide bottom action sheet on mobile viewport
+        if (window.innerWidth <= 768) {
+          setIsMobileSheetOpen(true);
+        }
       }, 500);
 
     } catch (err) {
@@ -385,13 +448,94 @@ function App() {
   };
 
   // Direct download handler via backend proxy
-  const handleDownloadMedia = async (mediaUrl, filename) => {
+  const handleDownloadMedia = async (mediaUrl, filename, quality = 'BEST') => {
     showToast('Piping stream download...', 'info');
-    const success = await downloadVideoFile(mediaUrl, filename);
+    const success = await downloadVideoFile(mediaUrl, filename, quality);
     if (success) {
       showToast('Download started!', 'success');
+      return true;
     } else {
       showToast('Could not start download, opening link instead.', 'error');
+      return false;
+    }
+  };
+
+  // Quality Selection Trigger
+  const handleDownloadQuality = (qualityKey) => {
+    if (isDownloading) return;
+    const qualityLabel = qualityKey === 'BEST' ? 'Best (1080p)' : qualityKey === 'HD' ? 'HD (720p)' : 'SD (480p)';
+    
+    if (qualityKey === 'SD') {
+      triggerDirectDownload(qualityKey, qualityLabel);
+    } else {
+      setPendingQuality({ key: qualityKey, label: qualityLabel });
+      setIsUnlockModalOpen(true);
+    }
+  };
+
+  const handleUnlockComplete = () => {
+    setIsUnlockModalOpen(false);
+    if (pendingQuality) {
+      triggerDirectDownload(pendingQuality.key, pendingQuality.label);
+      setPendingQuality(null);
+    }
+  };
+
+  const triggerDirectDownload = async (qualityKey, qualityLabel) => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    showToast('Preparing Download...', 'info');
+
+    // Show friendly preparation steps
+    const steps = [
+      'Preparing Download...',
+      `Fetching ${qualityKey} Quality...`,
+      'Generating Download Link...'
+    ];
+
+    let stepIndex = 0;
+    const stepInterval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        showToast(steps[stepIndex], 'info');
+        stepIndex++;
+      }
+    }, 700);
+
+    try {
+      const filename = `lumina_${reelData.id || 'reel'}_${qualityKey.toLowerCase()}.mp4`;
+      const success = await downloadVideoFile(reelData.videoUrl, filename, qualityKey);
+      
+      clearInterval(stepInterval);
+      setIsDownloading(false);
+
+      if (success) {
+        showToast('Download started!', 'success');
+        
+        // Save stats
+        const updatedStats = {
+          total: stats.total + 1,
+          hd: (qualityKey === 'HD' || qualityKey === 'BEST') ? stats.hd + 1 : stats.hd,
+          sd: qualityKey === 'SD' ? stats.sd + 1 : stats.sd
+        };
+        saveStats(updatedStats);
+
+        // Update history with quality
+        const updatedHistory = history.map(item => {
+          if (item.id === reelData.id) {
+            return { ...item, quality: qualityLabel };
+          }
+          return item;
+        });
+        saveHistory(updatedHistory);
+
+        // Trigger success view
+        setDownloadSuccessData({ reelData, qualityName: qualityLabel });
+      }
+    } catch (err) {
+      clearInterval(stepInterval);
+      setIsDownloading(false);
+      showToast('Download stream pipe failed. Retrying direct...', 'error');
+      window.open(reelData.videoUrl, '_blank');
     }
   };
 
@@ -408,6 +552,7 @@ function App() {
       setProgressStep('Analyzing Reel...');
       setReelData(null);
       setErrorDetails(null);
+      setDownloadSuccessData(null);
 
       let simulatedProgress = 0;
       const progressInterval = setInterval(() => {
@@ -449,6 +594,10 @@ function App() {
               ...updatedHistory
             ].slice(0, 20);
             saveHistory(updatedHistory);
+
+            if (window.innerWidth <= 768) {
+              setIsMobileSheetOpen(true);
+            }
           }, 500);
         })
         .catch((err) => {
@@ -507,9 +656,36 @@ function App() {
     }
   };
 
+  const handleShareApp = () => {
+    const shareUrl = window.location.origin;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Lumina Reels Downloader',
+        text: 'Save public Instagram reels instantly in high quality with a fast, secure, creator-friendly experience!',
+        url: shareUrl,
+      })
+      .then(() => showToast('Thanks for sharing!', 'success'))
+      .catch(() => {
+        navigator.clipboard.writeText(shareUrl)
+          .then(() => showToast('Website link copied to clipboard!', 'success'));
+      });
+    } else {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => showToast('Website link copied to clipboard!', 'success'));
+    }
+  };
+
+  const handleShareReel = (reelId) => {
+    const shareUrl = `https://www.instagram.com/reel/${reelId || reelData.id}/`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => showToast('Instagram Reel link copied!', 'success'))
+      .catch(() => showToast('Failed to copy link', 'error'));
+  };
+
   const handleLoadFromHistory = (item) => {
     setReelData(item);
     setErrorDetails(null);
+    setDownloadSuccessData(null);
     setUrl(item.id ? `https://www.instagram.com/reel/${item.id}/` : '');
     setIsPlayingPreview(false);
     
@@ -518,6 +694,25 @@ function App() {
       cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
+
+  // Filter history records based on search keywords and filter quality tags
+  const getFilteredHistory = () => {
+    return history.filter((item) => {
+      const matchesSearch = searchQuery.trim() === '' || 
+        item.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.caption && item.caption.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      let matchesFilter = true;
+      if (filterQuality !== 'ALL') {
+        const itemQual = item.quality ? item.quality.toUpperCase() : '';
+        matchesFilter = itemQual.includes(filterQuality);
+      }
+
+      return matchesSearch && matchesFilter;
+    });
+  };
+
+  const filteredHistory = getFilteredHistory();
 
   return (
     <>
@@ -537,7 +732,7 @@ function App() {
         <header className="header">
           <div 
             className="logo-container" 
-            onClick={() => { setCurrentPage('home'); setErrorDetails(null); setReelData(null); setUrl(''); }} 
+            onClick={() => { setCurrentPage('home'); setErrorDetails(null); setReelData(null); setUrl(''); setDownloadSuccessData(null); }} 
             style={{ cursor: 'pointer' }}
           >
             <div className="logo-icon-clay">
@@ -647,8 +842,34 @@ function App() {
                         </motion.div>
                       )}
 
-                      {/* B. INPUT STATE */}
-                      {!isLoading && !reelData && !errorDetails && (
+                      {/* B. SUCCESS DOWNLOAD STATE */}
+                      {!isLoading && downloadSuccessData && (
+                        <motion.div
+                          key="download-success-view"
+                          initial={{ opacity: 0, scale: 0.96 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
+                          style={{ zIndex: 2 }}
+                        >
+                          <DownloadSuccessScreen 
+                            reelData={downloadSuccessData.reelData}
+                            qualityName={downloadSuccessData.qualityName}
+                            onReset={() => {
+                              setDownloadSuccessData(null);
+                              setReelData(null);
+                              setUrl('');
+                            }}
+                            onViewHistory={() => {
+                              const el = document.getElementById('history-section-anchor');
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            onShareApp={handleShareApp}
+                          />
+                        </motion.div>
+                      )}
+
+                      {/* C. INPUT STATE */}
+                      {!isLoading && !reelData && !errorDetails && !downloadSuccessData && (
                         <motion.div
                           key="input-state"
                           initial={{ opacity: 0, y: 15 }}
@@ -744,8 +965,8 @@ function App() {
                         </motion.div>
                       )}
 
-                      {/* C. LOADING STATE */}
-                      {isLoading && !errorDetails && (
+                      {/* D. LOADING STATE */}
+                      {isLoading && !errorDetails && !downloadSuccessData && (
                         <motion.div
                           key="loading-state"
                           initial={{ opacity: 0 }}
@@ -772,8 +993,8 @@ function App() {
                         </motion.div>
                       )}
 
-                      {/* D. SUCCESS STATE */}
-                      {!isLoading && reelData && !errorDetails && (
+                      {/* E. SUCCESS ANALYSIS VIEW (Reel Preview Panel) */}
+                      {!isLoading && reelData && !errorDetails && !downloadSuccessData && (
                         <motion.div
                           key="success-state"
                           initial={{ opacity: 0, scale: 0.96 }}
@@ -864,17 +1085,58 @@ function App() {
                               </div>
                             </div>
 
-                            {/* Actions */}
+                            {/* Quality Selector Section */}
+                            <div className="quality-selector-container">
+                              <h4 className="quality-title-saas">Select Download Quality</h4>
+                              <div className="quality-grid-saas">
+                                
+                                {/* Best Quality Card */}
+                                <div 
+                                  className="clay-card quality-card-saas" 
+                                  onClick={() => handleDownloadQuality('BEST')}
+                                  style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                                >
+                                  <span className="quality-badge-saas badge-best">Best</span>
+                                  <span className="quality-res-saas">1080p</span>
+                                  <div className="quality-meta-info">
+                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'BEST')}</span>
+                                    <span>MP4 Format</span>
+                                  </div>
+                                </div>
+
+                                {/* HD Quality Card */}
+                                <div 
+                                  className="clay-card quality-card-saas" 
+                                  onClick={() => handleDownloadQuality('HD')}
+                                  style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                                >
+                                  <span className="quality-badge-saas badge-hd">HD</span>
+                                  <span className="quality-res-saas">720p</span>
+                                  <div className="quality-meta-info">
+                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'HD')}</span>
+                                    <span>MP4 Format</span>
+                                  </div>
+                                </div>
+
+                                {/* SD Quality Card */}
+                                <div 
+                                  className="clay-card quality-card-saas" 
+                                  onClick={() => handleDownloadQuality('SD')}
+                                  style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                                >
+                                  <span className="quality-badge-saas badge-sd">SD</span>
+                                  <span className="quality-res-saas">480p</span>
+                                  <div className="quality-meta-info">
+                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'SD')}</span>
+                                    <span>MP4 Format</span>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+
+                            {/* Actions Group */}
                             <div className="success-actions">
-                              <motion.button
-                                className="btn-clay btn-clay-primary"
-                                onClick={() => handleDownloadMedia(reelData.videoUrl, `lumina_${reelData.id || 'reel'}.mp4`)}
-                                whileHover={{ y: -2 }}
-                                whileTap={{ y: 1 }}
-                              >
-                                <Download size={18} /> Export Video File (MP4)
-                              </motion.button>
-                              
                               <div className="download-options-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
                                   <button
@@ -910,6 +1172,7 @@ function App() {
                                     setReelData(null);
                                     setUrl('');
                                     setErrorDetails(null);
+                                    setDownloadSuccessData(null);
                                   }}
                                 >
                                   <ArrowLeft size={16} /> Extract Another link
@@ -927,8 +1190,11 @@ function App() {
                   </div>
                 </div>
 
+                {/* Local Statistics/Analytics Dashboard */}
+                <AnalyticsCards stats={stats} />
+
                 {/* Recent Downloads Section */}
-                <section className="history-section">
+                <section id="history-section-anchor" className="history-section">
                   <div className="history-header">
                     <h2 className="history-heading">Recent Downloads</h2>
                     {history.length > 0 && (
@@ -938,10 +1204,39 @@ function App() {
                     )}
                   </div>
 
+                  {/* Search and Filters Bar */}
+                  {history.length > 0 && (
+                    <div className="history-filters-bar">
+                      <div className="clay-input-wrapper history-search-wrapper" style={{ padding: '0.35rem' }}>
+                        <input 
+                          type="text" 
+                          className="clay-input" 
+                          style={{ fontSize: '0.85rem', padding: '0.4rem 0.5rem' }}
+                          placeholder="Search history by creator/caption..." 
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          aria-label="Search download history"
+                        />
+                      </div>
+                      
+                      <div className="history-filter-chips">
+                        {['ALL', 'BEST', 'HD', 'SD'].map((q) => (
+                          <button
+                            key={q}
+                            className={`history-filter-chip ${filterQuality === q ? 'active' : ''}`}
+                            onClick={() => setFilterQuality(q)}
+                          >
+                            {q === 'ALL' ? 'All' : q}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="history-list">
                     <AnimatePresence initial={false}>
-                      {history.length > 0 ? (
-                        history.map((item) => (
+                      {filteredHistory.length > 0 ? (
+                        filteredHistory.map((item) => (
                           <motion.div
                             key={item.id}
                             initial={{ opacity: 0, height: 0, marginTop: 0 }}
@@ -957,8 +1252,11 @@ function App() {
                             </div>
                             
                             <div className="history-details">
-                              <div className="history-user-info">
+                              <div className="history-user-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                 <span className="history-username">@{item.username}</span>
+                                {item.quality && (
+                                  <span className="history-quality-tag">{item.quality}</span>
+                                )}
                               </div>
                               <p className="history-caption">{item.caption}</p>
                             </div>
@@ -976,7 +1274,10 @@ function App() {
                               <button
                                 className="btn-history-action"
                                 title="Download MP4"
-                                onClick={() => handleDownloadMedia(item.videoUrl, `lumina_${item.id}.mp4`)}
+                                onClick={() => {
+                                  const qKey = (item.quality || '').includes('480') ? 'SD' : (item.quality || '').includes('720') ? 'HD' : 'BEST';
+                                  handleDownloadMedia(item.videoUrl, `lumina_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
+                                }}
                                 aria-label={`Download mp4 file for ${item.username}`}
                               >
                                 <Download size={14} />
@@ -999,7 +1300,11 @@ function App() {
                           className="clay-card history-empty-card"
                         >
                           <Info size={28} className="history-empty-icon" />
-                          <span>Your curated download catalog is empty. Paste a link to get started.</span>
+                          <span>
+                            {history.length > 0 
+                              ? 'No matches found matching your filters.' 
+                              : 'Your curated download catalog is empty. Paste a link to get started.'}
+                          </span>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1139,6 +1444,36 @@ function App() {
             ))}
           </AnimatePresence>
         </div>
+
+        {/* Unlock Sponsor Ad Modal Component */}
+        <UnlockModal 
+          isOpen={isUnlockModalOpen} 
+          onClose={() => setIsUnlockModalOpen(false)} 
+          onUnlock={handleUnlockComplete}
+          qualityName={pendingQuality?.label}
+        />
+
+        {/* Mobile bottom sheet drawer */}
+        <AnimatePresence>
+          {isMobileSheetOpen && reelData && (
+            <MobileActionSheet 
+              isOpen={isMobileSheetOpen}
+              onClose={() => setIsMobileSheetOpen(false)}
+              reelData={reelData}
+              onDownloadClick={() => {
+                const el = document.getElementById('downloader-card-anchor');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              onCopyCaption={() => handleCopyCaption(reelData.caption)}
+              onCopyHashtags={() => handleCopyHashtags(reelData.caption)}
+              onShareClick={() => handleShareReel(reelData.id)}
+              onViewHistory={() => {
+                const el = document.getElementById('history-section-anchor');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
+          )}
+        </AnimatePresence>
 
       </div>
     </>
