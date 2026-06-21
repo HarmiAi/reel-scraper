@@ -29,6 +29,17 @@ import {
   parseShortcode
 } from './services/reelService';
 
+// Import SaaS page and product components
+import Footer from './components/Footer.jsx';
+import About from './components/About.jsx';
+import Contact from './components/Contact.jsx';
+import PrivacyPolicy from './components/PrivacyPolicy.jsx';
+import TermsOfService from './components/TermsOfService.jsx';
+import HowItWorks from './components/HowItWorks.jsx';
+import AnimatedCounter from './components/AnimatedCounter.jsx';
+import SkeletonLoader from './components/SkeletonLoader.jsx';
+import ErrorState from './components/ErrorState.jsx';
+
 // GPU-Accelerated 3D Parallax Canvas Particles System
 const CanvasParticles = () => {
   const canvasRef = useRef(null);
@@ -139,6 +150,10 @@ function App() {
   const [activeFaq, setActiveFaq] = useState({});
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
 
+  // SaaS enhancements
+  const [currentPage, setCurrentPage] = useState('home');
+  const [errorDetails, setErrorDetails] = useState(null);
+
   const mascotRef = useRef(null);
 
   // Load history from localStorage
@@ -224,9 +239,28 @@ function App() {
     }
   };
 
+  // Helper to parse error details returned from backend
+  const parseErrorType = (errorMsg) => {
+    const msg = errorMsg.toLowerCase();
+    if (msg.includes('private') || msg.includes('login') || msg.includes('restrict')) {
+      return 'private_reel';
+    }
+    if (msg.includes('unsupported') || msg.includes('tiktok') || msg.includes('youtube') || msg.includes('platform')) {
+      return 'unsupported_url';
+    }
+    if (msg.includes('rate limit') || msg.includes('429') || msg.includes('too many') || msg.includes('throttled')) {
+      return 'rate_limited';
+    }
+    if (msg.includes('404') || msg.includes('not found') || msg.includes('delete')) {
+      return 'reel_not_found';
+    }
+    return 'invalid_url';
+  };
+
   // Submit Handler calling real API
   const handleDownloadSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isLoading) return;
     
     const cleanedUrl = url.trim();
     if (!cleanedUrl) {
@@ -234,25 +268,57 @@ function App() {
       return;
     }
 
-    if (!validateReelUrl(cleanedUrl)) {
-      showToast('Invalid format. URL must be a public Instagram Reel, Post, or TV link.', 'error');
+    // Strict URL validation before backend request
+    try {
+      const parsedUrl = new URL(cleanedUrl);
+      if (parsedUrl.protocol !== 'https:') {
+        setErrorDetails({
+          type: 'invalid_url',
+          message: 'Security Alert: Only secure HTTPS connections are allowed.'
+        });
+        showToast('Only HTTPS links are supported', 'error');
+        return;
+      }
+      const hostname = parsedUrl.hostname.toLowerCase();
+      if (hostname !== 'instagram.com' && hostname !== 'www.instagram.com') {
+        setErrorDetails({
+          type: 'unsupported_url',
+          message: 'Unsupported Platform: Only Instagram Reels, Posts, and TV links are allowed.'
+        });
+        showToast('Only Instagram links are supported', 'error');
+        return;
+      }
+      const isPathValid = /^\/(reel|p|tv)\/[A-Za-z0-9_-]+/i.test(parsedUrl.pathname);
+      if (!isPathValid) {
+        setErrorDetails({
+          type: 'invalid_url',
+          message: 'Invalid Instagram path. Link must contain /reel/, /p/, or /tv/ shortcode.'
+        });
+        showToast('Invalid URL path structure', 'error');
+        return;
+      }
+    } catch (e) {
+      setErrorDetails({
+        type: 'invalid_url',
+        message: 'Malformed URL. Please copy-paste directly from Instagram.'
+      });
+      showToast('Malformed URL', 'error');
       return;
     }
 
     setIsLoading(true);
     setProgressPercent(0);
-    setProgressStep('Launching headless engine...');
+    setProgressStep('Analyzing Reel...');
     setReelData(null);
+    setErrorDetails(null);
     setIsPlayingPreview(false);
 
     // Dynamic extraction simulation ticks to keep the custom 3D morphing loader responsive
     let simulatedProgress = 0;
     const steps = [
-      { t: 'Starting Chromium sandbox...', min: 10 },
-      { t: 'Navigating to Instagram page...', min: 30 },
-      { t: 'Decrypting video content hashes...', min: 55 },
-      { t: 'Extracting stream node links...', min: 75 },
-      { t: 'Packaging download package...', min: 90 }
+      { t: 'Analyzing Reel...', min: 30 },
+      { t: 'Fetching Metadata...', min: 65 },
+      { t: 'Preparing Download...', min: 90 }
     ];
 
     const progressInterval = setInterval(() => {
@@ -280,7 +346,7 @@ function App() {
         setIsLoading(false);
         showToast('Reel extracted successfully!', 'success');
 
-        // Add to history list
+        // Add to history list (max 20)
         const existingIndex = history.findIndex((item) => item.id === data.id);
         let updatedHistory = [...history];
         if (existingIndex !== -1) {
@@ -297,7 +363,7 @@ function App() {
             timestamp: Date.now()
           },
           ...updatedHistory
-        ].slice(0, 10);
+        ].slice(0, 20);
         
         saveHistory(updatedHistory);
       }, 500);
@@ -305,7 +371,16 @@ function App() {
     } catch (err) {
       clearInterval(progressInterval);
       setIsLoading(false);
-      showToast(err.message || 'Scraping failed. Confirm the Instagram post is public.', 'error');
+      const errorMsg = err.message || 'Scraping failed. Confirm the Instagram post is public.';
+      
+      // Parse error type for custom ErrorState rendering
+      const errorType = parseErrorType(errorMsg);
+      setErrorDetails({
+        type: errorType,
+        message: errorMsg
+      });
+      
+      showToast(errorMsg, 'error');
     }
   };
 
@@ -322,6 +397,7 @@ function App() {
 
   // Quick select demo reel using REAL Puppeteer extraction
   const handleSelectDemo = (demoUrl) => {
+    if (isLoading) return;
     setUrl(demoUrl);
     showToast('Selected demo reel. Resolving link...', 'info');
     
@@ -329,18 +405,18 @@ function App() {
     setTimeout(() => {
       setIsLoading(true);
       setProgressPercent(0);
-      setProgressStep('Launching headless engine...');
+      setProgressStep('Analyzing Reel...');
       setReelData(null);
+      setErrorDetails(null);
 
       let simulatedProgress = 0;
       const progressInterval = setInterval(() => {
         simulatedProgress += 1.5;
         if (simulatedProgress <= 90) {
           setProgressPercent(Math.floor(simulatedProgress));
-          if (simulatedProgress < 25) setProgressStep('Starting Chromium sandbox...');
-          else if (simulatedProgress < 50) setProgressStep('Navigating to Instagram page...');
-          else if (simulatedProgress < 75) setProgressStep('Extracting stream node links...');
-          else setProgressStep('Packaging download package...');
+          if (simulatedProgress < 30) setProgressStep('Analyzing Reel...');
+          else if (simulatedProgress < 65) setProgressStep('Fetching Metadata...');
+          else setProgressStep('Preparing Download...');
         }
       }, 80);
 
@@ -371,14 +447,19 @@ function App() {
                 timestamp: Date.now()
               },
               ...updatedHistory
-            ].slice(0, 10);
+            ].slice(0, 20);
             saveHistory(updatedHistory);
           }, 500);
         })
         .catch((err) => {
           clearInterval(progressInterval);
           setIsLoading(false);
-          showToast(err.message, 'error');
+          const errorMsg = err.message || 'Scraping failed.';
+          setErrorDetails({
+            type: parseErrorType(errorMsg),
+            message: errorMsg
+          });
+          showToast(errorMsg, 'error');
         });
     }, 400);
   };
@@ -410,8 +491,25 @@ function App() {
       .catch(() => showToast('Failed to copy caption', 'error'));
   };
 
+  const handleCopyHashtags = (captionText) => {
+    if (!captionText) {
+      showToast('No caption text to extract hashtags from', 'error');
+      return;
+    }
+    const hashtags = captionText.match(/#[a-zA-Z0-9_]+/g);
+    if (hashtags && hashtags.length > 0) {
+      const hashtagStr = hashtags.join(' ');
+      navigator.clipboard.writeText(hashtagStr)
+        .then(() => showToast('Hashtags copied to clipboard!', 'success'))
+        .catch(() => showToast('Failed to copy hashtags', 'error'));
+    } else {
+      showToast('No hashtags found in the caption', 'info');
+    }
+  };
+
   const handleLoadFromHistory = (item) => {
     setReelData(item);
+    setErrorDetails(null);
     setUrl(item.id ? `https://www.instagram.com/reel/${item.id}/` : '');
     setIsPlayingPreview(false);
     
@@ -437,511 +535,583 @@ function App() {
       <div className="app-container">
         {/* Header */}
         <header className="header">
-          <div className="logo-container">
+          <div 
+            className="logo-container" 
+            onClick={() => { setCurrentPage('home'); setErrorDetails(null); setReelData(null); setUrl(''); }} 
+            style={{ cursor: 'pointer' }}
+          >
             <div className="logo-icon-clay">
               <Sparkles size={18} />
             </div>
             <span className="text-gradient">Lumina Reels</span>
           </div>
           <div className="header-actions">
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <button 
+              onClick={() => { setCurrentPage('about'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className="btn-clay btn-clay-secondary" 
               style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm)' }}
             >
-              Docs <ExternalLink size={14} />
-            </a>
+              About
+            </button>
           </div>
         </header>
 
         {/* Main Content Area */}
         <main style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
-          {/* Hero Section */}
-          <section className="hero-section">
-            <div className="hero-badge">
-              <span className="badge-dot"></span>
-              AI Creator Toolkit
-            </div>
+          <AnimatePresence mode="wait">
+            {currentPage === 'about' && (
+              <About key="about" setCurrentPage={setCurrentPage} />
+            )}
             
-            <h1 className="hero-heading">
-              Download Instagram Reels <br />
-              <span className="text-gradient">Beautifully.</span>
-            </h1>
-            
-            <p className="hero-subheading subtitle">
-              Extract raw MP4 video streams directly from public Instagram nodes. No watermarks, ads, or login wrappers.
-            </p>
+            {currentPage === 'contact' && (
+              <Contact key="contact" setCurrentPage={setCurrentPage} />
+            )}
 
-            {/* 3D Abstract Camera Sculpture Mascot (Parallax controlled) */}
-            <div className="sculpture-wrapper">
-              <div ref={mascotRef} className="sculpture-container">
-                <div className="sculpture-ribbon-2" />
-                <div className="sculpture-canister" />
-                <div className="sculpture-rim">
-                  <div className="sculpture-lens" />
-                </div>
-                <div className="sculpture-ribbon-1" />
-              </div>
-            </div>
-          </section>
+            {currentPage === 'privacy' && (
+              <PrivacyPolicy key="privacy" setCurrentPage={setCurrentPage} />
+            )}
 
-          {/* Downloader Card Anchor */}
-          <div id="downloader-card-anchor" className="downloader-card-container">
-            <div 
-              className="clay-card downloader-card spotlight-card"
-              onMouseMove={handleCardMouseMove}
-            >
-              {/* Reactive Spotlight Glow div */}
-              <div className="spotlight-glow" />
-              
-              <AnimatePresence mode="wait">
-                
-                {/* 1. INPUT STATE */}
-                {!isLoading && !reelData && (
-                  <motion.div
-                    key="input-state"
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 2 }}
+            {currentPage === 'terms' && (
+              <TermsOfService key="terms" setCurrentPage={setCurrentPage} />
+            )}
+
+            {currentPage === 'home' && (
+              <motion.div
+                key="home-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+              >
+                {/* Hero Section */}
+                <section className="hero-section">
+                  <div className="hero-badge">
+                    <span className="badge-dot"></span>
+                    SaaS Creator Toolkit
+                  </div>
+                  
+                  <h1 className="hero-heading">
+                    Download Instagram Reels <br />
+                    <span className="text-gradient">Instantly</span>
+                  </h1>
+                  
+                  <p className="hero-subheading subtitle">
+                    Save public Instagram reels in high quality with a fast, secure, creator-friendly experience.
+                  </p>
+
+                  {/* 3D Abstract Camera Sculpture Mascot (Parallax controlled) */}
+                  <div className="sculpture-wrapper">
+                    <div ref={mascotRef} className="sculpture-container">
+                      <div className="sculpture-ribbon-2" />
+                      <div className="sculpture-canister" />
+                      <div className="sculpture-rim">
+                        <div className="sculpture-lens" />
+                      </div>
+                      <div className="sculpture-ribbon-1" />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Animated downloaded counter */}
+                <AnimatedCounter target={12458} />
+
+                {/* Downloader Card Anchor */}
+                <div id="downloader-card-anchor" className="downloader-card-container">
+                  <div 
+                    className="clay-card downloader-card spotlight-card"
+                    onMouseMove={handleCardMouseMove}
                   >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <h3 style={{ fontWeight: 700, fontSize: '1.25rem' }}>Paste Reel URL</h3>
-                      <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                        Enter a valid public Instagram video link to pull the stream container.
+                    {/* Reactive Spotlight Glow div */}
+                    <div className="spotlight-glow" />
+                    
+                    <AnimatePresence mode="wait">
+                      
+                      {/* A. ERROR STATE */}
+                      {!isLoading && errorDetails && (
+                        <motion.div
+                          key="error-state-card"
+                          initial={{ opacity: 0, scale: 0.96 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
+                          style={{ zIndex: 2 }}
+                        >
+                          <ErrorState 
+                            errorType={errorDetails.type}
+                            customMessage={errorDetails.message}
+                            onReset={() => {
+                              setErrorDetails(null);
+                              setUrl('');
+                            }}
+                          />
+                        </motion.div>
+                      )}
+
+                      {/* B. INPUT STATE */}
+                      {!isLoading && !reelData && !errorDetails && (
+                        <motion.div
+                          key="input-state"
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -15 }}
+                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 2 }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <h3 style={{ fontWeight: 700, fontSize: '1.25rem' }}>Paste Reel URL</h3>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                              Enter a valid public Instagram video link to pull the stream container.
+                            </p>
+                          </div>
+
+                          <form onSubmit={handleDownloadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div className="clay-input-wrapper">
+                              <span className="input-icon-left">
+                                <DownloadCloud size={20} />
+                              </span>
+                              
+                              <label htmlFor="instagram-url-input" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', border: 0 }}>
+                                Instagram Reel URL
+                              </label>
+                              <input
+                                type="text"
+                                id="instagram-url-input"
+                                className="clay-input"
+                                placeholder="https://www.instagram.com/reel/..."
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                                aria-label="Instagram Reel URL"
+                              />
+
+                              {url && (
+                                <button
+                                  type="button"
+                                  className="btn-clay btn-clay-paste"
+                                  style={{ padding: '0.5rem', background: 'transparent', boxShadow: 'none', border: 'none', color: 'var(--text-tertiary)' }}
+                                  onClick={() => setUrl('')}
+                                  aria-label="Clear Input"
+                                >
+                                  <X size={16} />
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                className="btn-clay btn-clay-paste"
+                                onClick={handlePaste}
+                                aria-label="Paste from clipboard"
+                              >
+                                <Clipboard size={14} /> Paste
+                              </button>
+                            </div>
+
+                            <motion.button
+                              type="submit"
+                              className="btn-clay btn-clay-primary"
+                              disabled={isLoading}
+                              whileHover={isLoading ? {} : { y: -2 }}
+                              whileTap={isLoading ? {} : { y: 1 }}
+                              style={isLoading ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                            >
+                              <DownloadCloud size={18} /> Extract Media
+                            </motion.button>
+                          </form>
+
+                          {/* Quick Demos Panel */}
+                          <div className="demo-reels-container">
+                            <span className="demo-title">Try Public Instagram Presets</span>
+                            <div className="demo-chips">
+                              <button
+                                className="demo-chip"
+                                onClick={() => handleSelectDemo('https://www.instagram.com/reel/CdmYaq3LAYo/')}
+                              >
+                                Public Reel 🎬
+                              </button>
+                              <button
+                                className="demo-chip"
+                                onClick={() => handleSelectDemo('https://www.instagram.com/tv/CdmYaq3LAYo/')}
+                              >
+                                Public IGTV 📺
+                              </button>
+                              <button
+                                className="demo-chip"
+                                onClick={() => handleSelectDemo('https://www.instagram.com/p/CdmYaq3LAYo/')}
+                              >
+                                Public Post 📸
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* C. LOADING STATE */}
+                      {isLoading && !errorDetails && (
+                        <motion.div
+                          key="loading-state"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="loader-wrapper"
+                          style={{ zIndex: 2, width: '100%' }}
+                        >
+                          <div className="clay-loader-sphere" />
+                          <div className="loader-shadow" />
+                          
+                          <div className="loader-status-container">
+                            <span className="loader-percent">{progressPercent}%</span>
+                            <span className="loader-step">{progressStep}</span>
+                          </div>
+
+                          <div className="loader-progress-bar-bg">
+                            <div 
+                              className="loader-progress-bar-fill"
+                              style={{ width: `${progressPercent}%` }}
+                            />
+                          </div>
+                          <SkeletonLoader />
+                        </motion.div>
+                      )}
+
+                      {/* D. SUCCESS STATE */}
+                      {!isLoading && reelData && !errorDetails && (
+                        <motion.div
+                          key="success-state"
+                          initial={{ opacity: 0, scale: 0.96 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
+                          transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                          className="success-card"
+                          style={{ zIndex: 2 }}
+                        >
+                          {/* Media Thumbnail Column */}
+                          <div className="success-thumbnail-wrapper">
+                            {isPlayingPreview ? (
+                              <video
+                                src={reelData.videoUrl}
+                                className="success-thumbnail"
+                                controls
+                                autoPlay
+                                playsInline
+                                style={{ objectFit: 'contain', background: '#000' }}
+                              />
+                            ) : (
+                              <>
+                                <img 
+                                  src={reelData.thumbnailUrl} 
+                                  alt="Reel Cover" 
+                                  className="success-thumbnail" 
+                                />
+                                <button 
+                                  className="thumbnail-play-overlay"
+                                  onClick={() => setIsPlayingPreview(true)}
+                                  aria-label="Play video preview"
+                                >
+                                  <Play size={22} fill="currentColor" style={{ marginLeft: '4px' }} />
+                                </button>
+                                <span className="thumbnail-duration">{reelData.duration}</span>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Meta Details Column */}
+                          <div className="success-details">
+                            
+                            {/* Creator */}
+                            <div className="creator-profile">
+                              <div className="creator-avatar-clay">
+                                <img src={reelData.avatarUrl} alt={reelData.username} className="creator-avatar" />
+                              </div>
+                              <div className="creator-meta">
+                                <div className="creator-name-row">
+                                  <span className="creator-username">@{reelData.username}</span>
+                                  {reelData.verified && (
+                                    <span className="verified-icon" title="Verified Creator">
+                                      <ShieldCheck size={16} fill="currentColor" color="#080706" />
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="creator-followers">Public Reel Stream</span>
+                              </div>
+                            </div>
+
+                            {/* Caption (Sunken scroll box) */}
+                            <div className="success-caption">
+                              <p style={{ fontSize: '0.88rem', margin: 0 }}>{reelData.caption}</p>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="reel-statistics-grid">
+                              <div className="stat-item-clay">
+                                <Heart size={16} className="stat-icon" />
+                                <div className="stat-info">
+                                  <span className="stat-label">Likes</span>
+                                  <span className="stat-value">{reelData.likes}</span>
+                                </div>
+                              </div>
+                              <div className="stat-item-clay">
+                                <MessageCircle size={16} className="stat-icon" />
+                                <div className="stat-info">
+                                  <span className="stat-label">Comments</span>
+                                  <span className="stat-value">{reelData.comments}</span>
+                                </div>
+                              </div>
+                              <div className="stat-item-clay">
+                                <Music size={16} className="stat-icon" />
+                                <div className="stat-info">
+                                  <span className="stat-label">Audio</span>
+                                  <span className="stat-value">Original</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="success-actions">
+                              <motion.button
+                                className="btn-clay btn-clay-primary"
+                                onClick={() => handleDownloadMedia(reelData.videoUrl, `lumina_${reelData.id || 'reel'}.mp4`)}
+                                whileHover={{ y: -2 }}
+                                whileTap={{ y: 1 }}
+                              >
+                                <Download size={18} /> Export Video File (MP4)
+                              </motion.button>
+                              
+                              <div className="download-options-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+                                  <button
+                                    className="btn-clay btn-clay-secondary"
+                                    style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                                    onClick={() => handleCopyCaption(reelData.caption)}
+                                  >
+                                    <FileText size={16} /> Copy Caption
+                                  </button>
+                                  
+                                  <button
+                                    className="btn-clay btn-clay-secondary"
+                                    style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                                    onClick={() => handleCopyHashtags(reelData.caption)}
+                                  >
+                                    <Sparkles size={16} /> Copy Hashtags
+                                  </button>
+                                </div>
+                                <button
+                                  className="btn-clay btn-clay-secondary"
+                                  style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', width: '100%' }}
+                                  onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `lumina_${reelData.id || 'reel'}_cover.jpg`)}
+                                >
+                                  <Download size={16} /> Download Cover Image
+                                </button>
+                              </div>
+
+                              {/* Back / Downloader reset */}
+                              <div className="btn-back-container" style={{ marginTop: '0.75rem' }}>
+                                <button 
+                                  className="btn-back"
+                                  onClick={() => {
+                                    setReelData(null);
+                                    setUrl('');
+                                    setErrorDetails(null);
+                                  }}
+                                >
+                                  <ArrowLeft size={16} /> Extract Another link
+                                </button>
+                              </div>
+
+                            </div>
+
+                          </div>
+                        </motion.div>
+                      )}
+
+                    </AnimatePresence>
+
+                  </div>
+                </div>
+
+                {/* Recent Downloads Section */}
+                <section className="history-section">
+                  <div className="history-header">
+                    <h2 className="history-heading">Recent Downloads</h2>
+                    {history.length > 0 && (
+                      <button className="btn-clear-history" onClick={handleClearHistory} aria-label="Clear download history">
+                        <Trash2 size={13} /> Clear All
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="history-list">
+                    <AnimatePresence initial={false}>
+                      {history.length > 0 ? (
+                        history.map((item) => (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="clay-card history-item-card"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => handleLoadFromHistory(item)}
+                          >
+                            <div className="history-thumbnail-wrapper">
+                              <img src={item.thumbnailUrl} alt="" className="history-thumbnail" loading="lazy" />
+                            </div>
+                            
+                            <div className="history-details">
+                              <div className="history-user-info">
+                                <span className="history-username">@{item.username}</span>
+                              </div>
+                              <p className="history-caption">{item.caption}</p>
+                            </div>
+
+                            <div className="history-actions" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                className="btn-history-action"
+                                title="View Details"
+                                onClick={() => handleLoadFromHistory(item)}
+                                aria-label={`Restore details for ${item.username}`}
+                              >
+                                <RefreshCw size={14} />
+                              </button>
+                              
+                              <button
+                                className="btn-history-action"
+                                title="Download MP4"
+                                onClick={() => handleDownloadMedia(item.videoUrl, `lumina_${item.id}.mp4`)}
+                                aria-label={`Download mp4 file for ${item.username}`}
+                              >
+                                <Download size={14} />
+                              </button>
+
+                              <button
+                                className="btn-history-action btn-delete"
+                                title="Remove from history"
+                                onClick={(e) => handleDeleteHistoryItem(item.id, e)}
+                                aria-label={`Delete ${item.username} from history`}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))
+                      ) : (
+                        <motion.div
+                          key="empty"
+                          className="clay-card history-empty-card"
+                        >
+                          <Info size={28} className="history-empty-icon" />
+                          <span>Your curated download catalog is empty. Paste a link to get started.</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </section>
+
+                {/* How It Works Section */}
+                <HowItWorks />
+
+                {/* Features Section */}
+                <section className="features-section">
+                  <h2 className="features-heading">Engineered for the Modern Creator</h2>
+                  <div className="features-grid">
+                    
+                    <div className="clay-card feature-card">
+                      <div className="feature-icon-clay">
+                        <Zap size={20} />
+                      </div>
+                      <h3 className="feature-title">Headless Extraction</h3>
+                      <p className="feature-desc">
+                        Our backend clusters spin up sandboxed Chromium environments to fetch actual media files from the Instagram CDN.
                       </p>
                     </div>
 
-                    <form onSubmit={handleDownloadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      <div className="clay-input-wrapper">
-                        <span className="input-icon-left">
-                          <DownloadCloud size={20} />
-                        </span>
-                        
-                        <input
-                          type="text"
-                          className="clay-input"
-                          placeholder="https://www.instagram.com/reel/..."
-                          value={url}
-                          onChange={(e) => setUrl(e.target.value)}
-                        />
-
-                        {url && (
-                          <button
-                            type="button"
-                            className="btn-clay btn-clay-paste"
-                            style={{ padding: '0.5rem', background: 'transparent', boxShadow: 'none', border: 'none', color: 'var(--text-tertiary)' }}
-                            onClick={() => setUrl('')}
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          className="btn-clay btn-clay-paste"
-                          onClick={handlePaste}
-                        >
-                          <Clipboard size={14} /> Paste
-                        </button>
+                    <div className="clay-card feature-card">
+                      <div className="feature-icon-clay">
+                        <ShieldCheck size={20} />
                       </div>
-
-                      <motion.button
-                        type="submit"
-                        className="btn-clay btn-clay-primary"
-                        whileHover={{ y: -2 }}
-                        whileTap={{ y: 1 }}
-                      >
-                        <DownloadCloud size={18} /> Extract Media
-                      </motion.button>
-                    </form>
-
-                    {/* Quick Demos Panel */}
-                    <div className="demo-reels-container">
-                      <span className="demo-title">Try Public Instagram Presets</span>
-                      <div className="demo-chips">
-                        <button
-                          className="demo-chip"
-                          onClick={() => handleSelectDemo('https://www.instagram.com/reel/CdmYaq3LAYo/')}
-                        >
-                          Public Reel 🎬
-                        </button>
-                        <button
-                          className="demo-chip"
-                          onClick={() => handleSelectDemo('https://www.instagram.com/tv/CdmYaq3LAYo/')}
-                        >
-                          Public IGTV 📺
-                        </button>
-                        <button
-                          className="demo-chip"
-                          onClick={() => handleSelectDemo('https://www.instagram.com/p/CdmYaq3LAYo/')}
-                        >
-                          Public Post 📸
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 2. LOADING STATE */}
-                {isLoading && (
-                  <motion.div
-                    key="loading-state"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="loader-wrapper"
-                    style={{ zIndex: 2 }}
-                  >
-                    <div className="clay-loader-sphere" />
-                    <div className="loader-shadow" />
-                    
-                    <div className="loader-status-container">
-                      <span className="loader-percent">{progressPercent}%</span>
-                      <span className="loader-step">{progressStep}</span>
+                      <h3 className="feature-title">Secure & Private</h3>
+                      <p className="feature-desc">
+                        We never store credentials, session cookies, or tracker history. Downloads stream directly through memory.
+                      </p>
                     </div>
 
-                    <div className="loader-progress-bar-bg">
-                      <div 
-                        className="loader-progress-bar-fill"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 3. SUCCESS STATE */}
-                {!isLoading && reelData && (
-                  <motion.div
-                    key="success-state"
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                    className="success-card"
-                    style={{ zIndex: 2 }}
-                  >
-                    {/* Media Thumbnail Column */}
-                    <div className="success-thumbnail-wrapper">
-                      {isPlayingPreview ? (
-                        <video
-                          src={reelData.videoUrl}
-                          className="success-thumbnail"
-                          controls
-                          autoPlay
-                          playsInline
-                          style={{ objectFit: 'contain', background: '#000' }}
-                        />
-                      ) : (
-                        <>
-                          <img 
-                            src={reelData.thumbnailUrl} 
-                            alt="Reel Cover" 
-                            className="success-thumbnail" 
-                          />
-                          <button 
-                            className="thumbnail-play-overlay"
-                            onClick={() => setIsPlayingPreview(true)}
-                          >
-                            <Play size={22} fill="currentColor" style={{ marginLeft: '4px' }} />
-                          </button>
-                          <span className="thumbnail-duration">{reelData.duration}</span>
-                        </>
-                      )}
+                    <div className="clay-card feature-card">
+                      <div className="feature-icon-clay">
+                        <Sparkles size={20} />
+                      </div>
+                      <h3 className="feature-title">Ultra Bitrate Extracts</h3>
+                      <p className="feature-desc">
+                        Always grab the highest bitrate and resolution available from the Instagram CDN servers without compression loss.
+                      </p>
                     </div>
 
-                    {/* Meta Details Column */}
-                    <div className="success-details">
-                      
-                      {/* Creator */}
-                      <div className="creator-profile">
-                        <div className="creator-avatar-clay">
-                          <img src={reelData.avatarUrl} alt={reelData.username} className="creator-avatar" />
-                        </div>
-                        <div className="creator-meta">
-                          <div className="creator-name-row">
-                            <span className="creator-username">@{reelData.username}</span>
-                            {reelData.verified && (
-                              <span className="verified-icon" title="Verified Creator">
-                                <ShieldCheck size={16} fill="currentColor" color="#080706" />
-                              </span>
-                            )}
-                          </div>
-                          <span className="creator-followers">Public Reel Stream</span>
-                        </div>
-                      </div>
-
-                      {/* Caption (Sunken scroll box) */}
-                      <div className="success-caption">
-                        <p style={{ fontSize: '0.88rem', margin: 0 }}>{reelData.caption}</p>
-                      </div>
-
-                      {/* Stats Grid */}
-                      <div className="reel-statistics-grid">
-                        <div className="stat-item-clay">
-                          <Heart size={16} className="stat-icon" />
-                          <div className="stat-info">
-                            <span className="stat-label">Likes</span>
-                            <span className="stat-value">{reelData.likes}</span>
-                          </div>
-                        </div>
-                        <div className="stat-item-clay">
-                          <MessageCircle size={16} className="stat-icon" />
-                          <div className="stat-info">
-                            <span className="stat-label">Comments</span>
-                            <span className="stat-value">{reelData.comments}</span>
-                          </div>
-                        </div>
-                        <div className="stat-item-clay">
-                          <Music size={16} className="stat-icon" />
-                          <div className="stat-info">
-                            <span className="stat-label">Audio</span>
-                            <span className="stat-value">Original</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="success-actions">
-                        <motion.button
-                          className="btn-clay btn-clay-primary"
-                          onClick={() => handleDownloadMedia(reelData.videoUrl, `lumina_${reelData.id || 'reel'}.mp4`)}
-                          whileHover={{ y: -2 }}
-                          whileTap={{ y: 1 }}
-                        >
-                          <Download size={18} /> Export Video File (MP4)
-                        </motion.button>
-                        
-                        <div className="download-options-group">
-                          <button
-                            className="btn-clay btn-clay-secondary"
-                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem' }}
-                            onClick={() => handleCopyCaption(reelData.caption)}
-                          >
-                            <FileText size={16} /> Copy Caption
-                          </button>
-                          
-                          <button
-                            className="btn-clay btn-clay-secondary"
-                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem' }}
-                            onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `lumina_${reelData.id || 'reel'}_cover.jpg`)}
-                          >
-                            <Download size={16} /> Cover Image
-                          </button>
-                        </div>
-
-                        {/* Back / Downloader reset */}
-                        <div className="btn-back-container" style={{ marginTop: '0.75rem' }}>
-                          <button 
-                            className="btn-back"
-                            onClick={() => {
-                              setReelData(null);
-                              setUrl('');
-                            }}
-                          >
-                            <ArrowLeft size={16} /> Extract Another link
-                          </button>
-                        </div>
-
-                      </div>
-
-                    </div>
-                  </motion.div>
-                )}
-
-              </AnimatePresence>
-
-            </div>
-          </div>
-
-          {/* Recent Downloads Section */}
-          <section className="history-section">
-            <div className="history-header">
-              <h2 className="history-heading">Recent Downloads</h2>
-              {history.length > 0 && (
-                <button className="btn-clear-history" onClick={handleClearHistory}>
-                  <Trash2 size={13} /> Clear All
-                </button>
-              )}
-            </div>
-
-            <div className="history-list">
-              <AnimatePresence initial={false}>
-                {history.length > 0 ? (
-                  history.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="clay-card history-item-card"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleLoadFromHistory(item)}
-                    >
-                      <div className="history-thumbnail-wrapper">
-                        <img src={item.thumbnailUrl} alt="" className="history-thumbnail" />
-                      </div>
-                      
-                      <div className="history-details">
-                        <div className="history-user-info">
-                          <span className="history-username">@{item.username}</span>
-                        </div>
-                        <p className="history-caption">{item.caption}</p>
-                      </div>
-
-                      <div className="history-actions" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          className="btn-history-action"
-                          title="View Details"
-                          onClick={() => handleLoadFromHistory(item)}
-                        >
-                          <RefreshCw size={14} />
-                        </button>
-                        
-                        <button
-                          className="btn-history-action"
-                          title="Download MP4"
-                          onClick={() => handleDownloadMedia(item.videoUrl, `lumina_${item.id}.mp4`)}
-                        >
-                          <Download size={14} />
-                        </button>
-
-                        <button
-                          className="btn-history-action btn-delete"
-                          title="Remove from history"
-                          onClick={(e) => handleDeleteHistoryItem(item.id, e)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <motion.div
-                    key="empty"
-                    className="clay-card history-empty-card"
-                  >
-                    <Info size={28} className="history-empty-icon" />
-                    <span>Your curated download catalog is empty. Paste a link to get started.</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </section>
-
-          {/* Features Section */}
-          <section className="features-section">
-            <h2 className="features-heading">Engineered for the Modern Creator</h2>
-            <div className="features-grid">
-              
-              <div className="clay-card feature-card">
-                <div className="feature-icon-clay">
-                  <Zap size={20} />
-                </div>
-                <h3 className="feature-title">Headless Extraction</h3>
-                <p className="feature-desc">
-                  Our backend clusters spin up sandboxed Chromium environments to fetch actual media files from the Instagram CDN.
-                </p>
-              </div>
-
-              <div className="clay-card feature-card">
-                <div className="feature-icon-clay">
-                  <ShieldCheck size={20} />
-                </div>
-                <h3 className="feature-title">Secure & Secure</h3>
-                <p className="feature-desc">
-                  We never store credentials, session cookies, or tracker history. Downloads stream directly through memory.
-                </p>
-              </div>
-
-              <div className="clay-card feature-card">
-                <div className="feature-icon-clay">
-                  <Sparkles size={20} />
-                </div>
-                <h3 className="feature-title">Ultra Bitrate Extracts</h3>
-                <p className="feature-desc">
-                  Always grab the highest bitrate and resolution available from the Instagram CDN servers without compression loss.
-                </p>
-              </div>
-
-            </div>
-          </section>
-
-          {/* FAQ Accordion Section */}
-          <section className="faq-section">
-            <h2 className="faq-heading">Frequently Asked Questions</h2>
-            
-            <div className="faq-list">
-              {[
-                {
-                  q: "How does the Lumina downloader work?",
-                  a: "Lumina Reels parses public Instagram media payloads using Puppeteer. It targets the direct CDN stream URL associated with the shortcode in your link, fetching the raw MP4 media file directly so you get it without any extra watermarks or compression."
-                },
-                {
-                  q: "Do I need to log in to my Instagram account?",
-                  a: "No, Lumina Reels does not require your credentials, login cookies, or any authorization. It processes all links completely anonymously, ensuring your personal account remains safe."
-                },
-                {
-                  q: "Can I download reels from private accounts?",
-                  a: "No, because private accounts restrict direct access to media nodes on Instagram's server side. Lumina Reels only works on public posts, IGTVs, and Reels."
-                },
-                {
-                  q: "Is there a limit to the number of downloads?",
-                  a: "Absolutely not. Lumina Reels is built as a clean creator utility with zero throttling, advertising caps, or paywalls. Use it as much as you need."
-                }
-              ].map((item, idx) => (
-                <div key={idx} className="clay-card faq-item-card">
-                  <button 
-                    className="faq-trigger" 
-                    onClick={() => toggleFaq(idx)}
-                    aria-expanded={activeFaq[idx] ? "true" : "false"}
-                  >
-                    <span className="faq-question">{item.q}</span>
-                    <motion.span 
-                      className="faq-arrow"
-                      animate={{ rotate: activeFaq[idx] ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ChevronDown size={18} />
-                    </motion.span>
-                  </button>
-                  
-                  <div 
-                    className="faq-content"
-                    style={{ 
-                      maxHeight: activeFaq[idx] ? '200px' : '0px'
-                    }}
-                  >
-                    <div className="faq-answer">
-                      {item.a}
-                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                </section>
+
+                {/* FAQ Accordion Section */}
+                <section className="faq-section">
+                  <h2 className="faq-heading">Frequently Asked Questions</h2>
+                  
+                  <div className="faq-list">
+                    {[
+                      {
+                        q: "Is Lumina Reels free?",
+                        a: "Yes, Lumina Reels is a 100% free creator utility. There are no registration forms, hidden monthly subscription tiers, advertising overlays, or export limits."
+                      },
+                      {
+                        q: "Is it safe?",
+                        a: "Absolutely. Lumina Reels operates under a strict privacy-first model. We do not require credential logs, session storage trackers, or account authorization. All videos stream dynamically through isolated sandboxed environments directly to your local device memory."
+                      },
+                      {
+                        q: "Does it work with private reels?",
+                        a: "No. Private reels restrict access to unauthorized viewer nodes on Instagram's server side. Lumina Reels respects content privacy settings and only processes links originating from public profiles."
+                      },
+                      {
+                        q: "What quality is supported?",
+                        a: "We extract the highest possible quality and bitrate available from the Instagram CDN container nodes (typically raw 1080p MP4 formats) without any additional compression loss."
+                      },
+                      {
+                        q: "Is registration required?",
+                        a: "No registration is required. You can start downloading and indexing public Instagram reels instantly without creating an account."
+                      }
+                    ].map((item, idx) => (
+                      <div key={idx} className="clay-card faq-item-card">
+                        <button 
+                          className="faq-trigger" 
+                          onClick={() => toggleFaq(idx)}
+                          aria-expanded={activeFaq[idx] ? "true" : "false"}
+                        >
+                          <span className="faq-question">{item.q}</span>
+                          <motion.span 
+                            className="faq-arrow"
+                            animate={{ rotate: activeFaq[idx] ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronDown size={18} />
+                          </motion.span>
+                        </button>
+                        
+                        <div 
+                          className="faq-content"
+                          style={{ 
+                            maxHeight: activeFaq[idx] ? '200px' : '0px'
+                          }}
+                        >
+                          <div className="faq-answer">
+                            {item.a}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
         </main>
 
         {/* Footer */}
-        <footer className="footer">
-          <div className="footer-links">
-            <a href="#downloader-card-anchor" className="footer-link">Downloader</a>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>•</span>
-            <a href="https://github.com" className="footer-link">Documentation</a>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>•</span>
-            <a href="https://instagram.com" className="footer-link">Instagram API</a>
-          </div>
-          <p className="footer-text">
-            © 2026 Lumina Creator Toolkit. Handcrafted with luxury minimalist aesthetics. All rights reserved.
-          </p>
-          <span className="footer-tagline">Premium Awwwards Concept</span>
-        </footer>
+        <Footer setCurrentPage={setCurrentPage} currentPage={currentPage} />
 
         {/* Toast Alerts System */}
         <div className="toasts-container">
@@ -962,7 +1132,7 @@ function App() {
                 
                 <span className="toast-message">{toast.message}</span>
                 
-                <button className="toast-close" onClick={() => removeToast(toast.id)}>
+                <button className="toast-close" onClick={() => removeToast(toast.id)} aria-label="Close Notification">
                   <X size={14} />
                 </button>
               </motion.div>
