@@ -79,12 +79,12 @@ export const fetchReelData = async (url) => {
  * @param {string} fileName - File name to save as
  * @returns {Promise<boolean>}
  */
-export const downloadVideoFile = async (videoUrl, fileName = 'lumina_reel.mp4', quality = 'BEST') => {
+export const downloadVideoFile = async (videoUrl, fileName = 'lumina_reel.mp4', quality = 'BEST', id = '') => {
   if (!videoUrl) return false;
   
   try {
     // Generate proxy URL using the absolute backend baseURL
-    const proxyUrl = `${API_BASE_URL}/api/reels/downloadProxy?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(fileName)}&quality=${quality.toUpperCase()}`;
+    const proxyUrl = `${API_BASE_URL}/api/reels/downloadProxy?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(fileName)}&quality=${quality.toUpperCase()}&id=${encodeURIComponent(id)}`;
     
     // Create an anchor node, trigger download click programmatically
     const link = document.createElement('a');

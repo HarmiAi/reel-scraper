@@ -7,6 +7,7 @@ import reelRoutes from './routes/reelRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import historyRoutes from './routes/historyRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { startCleanupJob } from './controllers/reelController.js';
 
 // Load environmental keys
 dotenv.config();
@@ -65,6 +66,9 @@ const startServer = async () => {
       console.log(`➜  Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`=========================================`);
     });
+
+    // Start background temp files cleanup job
+    startCleanupJob();
   } catch (err) {
     console.error(`💥 Failed to bootstrap backend server: ${err.message}`);
     process.exit(1);

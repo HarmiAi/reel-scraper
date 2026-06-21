@@ -44,6 +44,8 @@ import MobileActionSheet from './components/MobileActionSheet.jsx';
 import DownloadSuccessScreen from './components/DownloadSuccessScreen.jsx';
 import AnalyticsCards from './components/AnalyticsCards.jsx';
 
+const FALLBACK_THUMBNAIL = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600"><rect width="100%" height="100%" fill="%231a1a24"/><g fill="none" stroke="%233f3f56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(170, 270)"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><path d="M7 2h10M5 22h14M12 18v-4M9 14h6"/></g><text x="50%" y="55%" font-family="sans-serif" font-size="14" fill="%236b6b83" dominant-baseline="middle" text-anchor="middle">Preview Unavailable</text></svg>`;
+
 // GPU-Accelerated 3D Parallax Canvas Particles System
 const CanvasParticles = () => {
   const canvasRef = useRef(null);
@@ -463,7 +465,7 @@ function App() {
   // Quality Selection Trigger
   const handleDownloadQuality = (qualityKey) => {
     if (isDownloading) return;
-    const qualityLabel = qualityKey === 'BEST' ? 'Best (1080p)' : qualityKey === 'HD' ? 'HD (720p)' : 'SD (480p)';
+    const qualityLabel = qualityKey === 'BEST' ? 'High' : qualityKey === 'HD' ? 'Medium' : 'Low';
     
     if (qualityKey === 'SD') {
       triggerDirectDownload(qualityKey, qualityLabel);
@@ -503,7 +505,7 @@ function App() {
 
     try {
       const filename = `lumina_${reelData.id || 'reel'}_${qualityKey.toLowerCase()}.mp4`;
-      const success = await downloadVideoFile(reelData.videoUrl, filename, qualityKey);
+      const success = await downloadVideoFile(reelData.videoUrl, filename, qualityKey, reelData.id);
       
       clearInterval(stepInterval);
       setIsDownloading(false);
@@ -1021,6 +1023,10 @@ function App() {
                                   src={reelData.thumbnailUrl} 
                                   alt="Reel Cover" 
                                   className="success-thumbnail" 
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = FALLBACK_THUMBNAIL;
+                                  }}
                                 />
                                 <button 
                                   className="thumbnail-play-overlay"
@@ -1096,10 +1102,10 @@ function App() {
                                   onClick={() => handleDownloadQuality('BEST')}
                                   style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
                                 >
-                                  <span className="quality-badge-saas badge-best">Best</span>
-                                  <span className="quality-res-saas">1080p</span>
+                                  <span className="quality-badge-saas badge-best">High</span>
+                                  <span className="quality-res-saas">Original / 1080p</span>
                                   <div className="quality-meta-info">
-                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'BEST')}</span>
+                                    <span className="quality-size-saas">{reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
                                     <span>MP4 Format</span>
                                   </div>
                                 </div>
@@ -1110,10 +1116,10 @@ function App() {
                                   onClick={() => handleDownloadQuality('HD')}
                                   style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
                                 >
-                                  <span className="quality-badge-saas badge-hd">HD</span>
+                                  <span className="quality-badge-saas badge-hd">Medium</span>
                                   <span className="quality-res-saas">720p</span>
                                   <div className="quality-meta-info">
-                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'HD')}</span>
+                                    <span className="quality-size-saas">{reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
                                     <span>MP4 Format</span>
                                   </div>
                                 </div>
@@ -1124,10 +1130,10 @@ function App() {
                                   onClick={() => handleDownloadQuality('SD')}
                                   style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
                                 >
-                                  <span className="quality-badge-saas badge-sd">SD</span>
+                                  <span className="quality-badge-saas badge-sd">Low</span>
                                   <span className="quality-res-saas">480p</span>
                                   <div className="quality-meta-info">
-                                    <span className="quality-size-saas">{calculateSize(reelData.duration, 'SD')}</span>
+                                    <span className="quality-size-saas">{reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
                                     <span>MP4 Format</span>
                                   </div>
                                 </div>
@@ -1248,7 +1254,16 @@ function App() {
                             onClick={() => handleLoadFromHistory(item)}
                           >
                             <div className="history-thumbnail-wrapper">
-                              <img src={item.thumbnailUrl} alt="" className="history-thumbnail" loading="lazy" />
+                              <img 
+                                src={item.thumbnailUrl} 
+                                alt="" 
+                                className="history-thumbnail" 
+                                loading="lazy" 
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = FALLBACK_THUMBNAIL;
+                                }}
+                              />
                             </div>
                             
                             <div className="history-details">

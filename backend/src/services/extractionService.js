@@ -12,6 +12,15 @@ export class ReelExtractionService {
       throw new Error('No URL provided');
     }
 
+    // Normalize URL: trim and remove query/tracking parameters
+    try {
+      const parsed = new URL(url.trim());
+      const cleanPath = parsed.pathname.endsWith('/') ? parsed.pathname : `${parsed.pathname}/`;
+      url = `${parsed.protocol}//${parsed.hostname}${cleanPath}`;
+    } catch (e) {
+      console.warn('[ReelExtractionService] Failed to normalize URL:', e.message);
+    }
+
     console.log(`[ReelExtractionService] Starting extraction for URL: ${url}`);
     
     // Validate basic URL pattern (p, reel, tv)

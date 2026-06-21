@@ -140,7 +140,7 @@
 /* Downloader Card Container */
 .downloader-card-container {
   width: 100%;
-  max-width: 680px;
+  max-width: 880px;
   margin-bottom: 5rem;
   z-index: 3;
   animation: fade-in-up 1.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -708,7 +708,7 @@
 /* Recent Downloads History Panel */
 .history-section {
   width: 100%;
-  max-width: 680px;
+  max-width: 880px;
   margin-bottom: 5rem;
   animation: fade-in-up 1.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
@@ -2352,7 +2352,7 @@ textarea:focus-visible {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   width: 100%;
-  max-width: 680px;
+  max-width: 880px;
   margin-top: 1rem;
   margin-bottom: 2rem;
   animation: fade-in-up 1.3s cubic-bezier(0.16, 1, 0.3, 1);
