@@ -323,7 +323,10 @@ const FacebookDownloader = ({ navigate }) => {
 
     try {
       const filename = `lumina_fb_${reelData.id || 'video'}_${qualityKey.toLowerCase()}.mp4`;
-      const success = await downloadFacebookFile(reelData.videoUrl, filename, qualityKey, reelData.id);
+      const downloadUrl = (qualityKey === 'SD' && reelData.sdVideoUrl) 
+        ? reelData.sdVideoUrl 
+        : ((qualityKey === 'HD' && reelData.hdVideoUrl) ? reelData.hdVideoUrl : reelData.videoUrl);
+      const success = await downloadFacebookFile(downloadUrl, filename, qualityKey, reelData.id);
       
       clearInterval(stepInterval);
       setIsDownloading(false);
