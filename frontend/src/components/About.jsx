@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, Users, ShieldCheck, Zap, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const About = ({ setCurrentPage }) => {
+const About = ({ navigate }) => {
   return (
     <motion.div 
       className="page-container"
@@ -12,8 +12,8 @@ const About = ({ setCurrentPage }) => {
       transition={{ duration: 0.4 }}
     >
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '2rem' }}>
-        <button className="btn-back" onClick={() => { setCurrentPage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          <ArrowLeft size={16} /> Back to Downloader
+        <button className="btn-back" onClick={() => navigate('/')}>
+          <ArrowLeft size={16} /> Back to Dashboard
         </button>
       </div>
 

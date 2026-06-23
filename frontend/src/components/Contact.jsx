@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Mail, MessageSquare, Send, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Contact = ({ setCurrentPage }) => {
+const Contact = ({ navigate }) => {
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -25,8 +25,8 @@ const Contact = ({ setCurrentPage }) => {
       transition={{ duration: 0.4 }}
     >
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '2rem' }}>
-        <button className="btn-back" onClick={() => { setCurrentPage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-          <ArrowLeft size={16} /> Back to Downloader
+        <button className="btn-back" onClick={() => navigate('/')}>
+          <ArrowLeft size={16} /> Back to Dashboard
         </button>
       </div>
 

@@ -1,92 +1,76 @@
 :root {
-  /* Colors - Luxury Dark Theme */
-  --bg-color: #080706;               /* Warm Charcoal Black */
-  --text-primary: #ECE9E4;           /* Luxury Cream/Off-White */
-  --text-secondary: #9E9990;         /* Muted Warm Gray */
-  --text-tertiary: #5E5A52;          /* Dark Slate Gray */
+  /* Colors - Premium Light Neumorphic Theme */
+  --bg-color: #F6F4E8;               /* Ivory cream background */
+  --surface-color: #E5EEE4;          /* Pastel sage/grey surface */
+  --card-bg: #C0E1D2;                 /* Soft mint/sage card background */
   
-  --primary-color: #ECE9E4;          /* Main Action Color (Cream) */
-  --primary-hover: #FFFFFF;          /* Pure White on Hover */
-  --primary-light: rgba(236, 233, 228, 0.06);
+  --text-primary: #1E2B24;           /* Dark forest green for readability */
+  --text-secondary: #5A6E63;         /* Muted slate/sage green */
+  --text-tertiary: #A5B8AE;          /* Muted light green */
   
-  --accent-color: #E6C587;           /* Premium Brushed Champagne Gold */
-  --accent-light: #1E1B17;           /* Dark Metallic Gold-Black */
-  --accent-soft: rgba(230, 197, 135, 0.08);
-  --accent-glow: rgba(230, 197, 135, 0.25);
+  --primary-color: #C0E1D2;          /* Primary Accent (Dusty Rose) */
+  --primary-hover: #C0E1D2;          /* Softer rose for hover */
+  --primary-light: rgba(220, 155, 155, 0.08);
   
-  --success-color: #89A884;          /* Soft Sage Green */
-  --success-soft: rgba(137, 168, 132, 0.08);
-  --error-color: #D29486;            /* Soft Terracotta Red */
-  --error-soft: rgba(210, 148, 134, 0.08);
+  --accent-color: #C0E1D2;
+  --accent-light: #C0E1D2;
+  --accent-soft: rgba(220, 155, 155, 0.08);
+  --accent-glow: rgba(220, 155, 155, 0.2);
+  
+  --success-color: #10B981;
+  --success-soft: rgba(16, 185, 129, 0.08);
+  --error-color: #EF4444;
+  --error-soft: rgba(239, 68, 68, 0.08);
   
   /* Font & Spacing */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --tracking-wide: 0.05em;
-  --tracking-wider: 0.1em;
+  --tracking-wide: 0.03em;
+  --tracking-wider: 0.05em;
   --tracking-tight: -0.02em;
   
   /* Border Radiuses */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 26px;
-  --radius-xl: 36px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;                 /* Buttons radius */
+  --radius-lg: 18px;                 /* URL Input & Cards radius */
+  --radius-xl: 26px;
   --radius-full: 9999px;
   
-  /* 
-     Claymorphism + Glassmorphism Hybrid Shadows (Luxury Dark Theme)
-     Outer: Large diffuse ambient drop shadows + sharp edge drop shadow.
-     Inner: 1px specular white border highlight (simulates glass edge refraction) + dark bottom inner shadow.
-  */
-  --clay-bg: rgba(20, 18, 16, 0.65); /* Glass-Clay Semi-Transparent Backing */
+  /* Soft Neumorphic Shadows (Highlights & Delicate shadows) */
+  --light-highlight: rgba(255, 255, 255, 0.95);
+  --dark-shadow: rgba(170, 165, 140, 0.25); /* Beige-tinted dark shadow for ivory */
   
-  --clay-shadow-outer: 
-    0px 4px 10px rgba(0, 0, 0, 0.4),
-    0px 24px 64px rgba(0, 0, 0, 0.75),
-    inset 1px 1px 0px rgba(255, 255, 255, 0.14); /* Refraction border */
+  --shadow-raised: 6px 6px 12px var(--dark-shadow), -6px -6px 12px var(--light-highlight);
+  --shadow-sunken: inset 4px 4px 8px var(--dark-shadow), inset -4px -4px 8px var(--light-highlight);
+  --shadow-hover: 8px 8px 16px rgba(170, 165, 140, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.98);
   
-  --clay-shadow-inner: 
-    inset 1px 1px 1px rgba(255, 255, 255, 0.08), 
-    inset -2px -2px 6px rgba(0, 0, 0, 0.4);
-
-  /* Hover Lift State */
-  --clay-shadow-lifted-outer: 
-    0px 8px 20px rgba(0, 0, 0, 0.5),
-    0px 32px 80px rgba(0, 0, 0, 0.85),
-    inset 1px 1px 0px rgba(255, 255, 255, 0.22);
+  /* Soft shadows matched specifically to surface bases */
+  --shadow-card-raised: 6px 6px 12px rgba(135, 170, 155, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.9);
+  --shadow-card-sunken: inset 4px 4px 8px rgba(135, 170, 155, 0.35), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
   
-  --clay-shadow-lifted-inner: 
-    inset 2px 2px 2px rgba(255, 255, 255, 0.12), 
-    inset -3px -3px 8px rgba(0, 0, 0, 0.4);
-
-  /* Sunken State (for Input Boxes) */
-  --clay-shadow-sunken: 
-    inset 2px 2px 6px rgba(0, 0, 0, 0.6), 
-    inset -1px -1px 2px rgba(255, 255, 255, 0.04),
-    0px 1px 1px rgba(255, 255, 255, 0.02);
-    
-  /* Tactile Glass Buttons */
-  --clay-btn-shadow:
-    0px 4px 12px rgba(0, 0, 0, 0.3),
-    inset 1px 1px 1px rgba(255, 255, 255, 0.08),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.2);
-
-  --clay-btn-hover-shadow:
-    0px 8px 18px rgba(0, 0, 0, 0.4),
-    inset 1px 1px 1px rgba(255, 255, 255, 0.12),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.2);
-
-  --clay-btn-active-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.5),
-    0px 1px 1px rgba(255, 255, 255, 0.03);
-    
-  /* Animated Ambient Lights (Luxury Deep Tones) */
-  --glow-circle-1: rgba(140, 110, 80, 0.18);   /* Dark Almond Gold */
-  --glow-circle-2: rgba(90, 60, 110, 0.22);    /* Velvet Deep Purple */
-  --glow-circle-3: rgba(230, 197, 135, 0.12);   /* Soft Gold Backlighting */
+  --shadow-surface-raised: 6px 6px 12px rgba(165, 185, 160, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.9);
+  --shadow-surface-sunken: inset 4px 4px 8px rgba(165, 185, 160, 0.35), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  
+  --shadow-rose-raised: 6px 6px 12px rgba(180, 130, 130, 0.35), -6px -6px 12px rgba(255, 255, 255, 0.6);
+  --shadow-rose-sunken: inset 3px 3px 6px rgba(130, 80, 80, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+  
+  /* Legacy compatibility overrides */
+  --clay-bg: var(--card-bg);
+  --clay-shadow-outer: var(--shadow-card-raised);
+  --clay-shadow-inner: none;
+  --clay-shadow-lifted-outer: var(--shadow-hover);
+  --clay-shadow-lifted-inner: none;
+  --clay-shadow-sunken: var(--shadow-card-sunken);
+  --clay-btn-shadow: var(--shadow-surface-raised);
+  --clay-btn-hover-shadow: var(--shadow-hover);
+  --clay-btn-active-shadow: var(--shadow-surface-sunken);
+  
+  /* Ambient Lights - Airy Ivory glows */
+  --glow-circle-1: rgba(255, 255, 255, 0.4);
+  --glow-circle-2: rgba(229, 238, 228, 0.3);
+  --glow-circle-3: rgba(192, 225, 210, 0.2);
   
   /* Transitions */
-  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-bounce: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-smooth: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: all 0.12s cubic-bezier(0.25, 0.8, 0.25, 1);
 }

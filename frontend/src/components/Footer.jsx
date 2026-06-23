@@ -1,11 +1,11 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 
-const Footer = ({ setCurrentPage, currentPage }) => {
+const Footer = ({ navigate, currentPath }) => {
   return (
     <footer className="footer-saas">
       <div className="footer-content">
-        <div className="footer-brand" onClick={() => { setCurrentPage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ cursor: 'pointer' }}>
+        <div className="footer-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <div className="logo-icon-clay">
             <Sparkles size={16} />
           </div>
@@ -13,26 +13,26 @@ const Footer = ({ setCurrentPage, currentPage }) => {
         </div>
         <div className="footer-links-grid">
           <button 
-            className={`footer-btn-link ${currentPage === 'about' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('about'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`footer-btn-link ${currentPath === '/about' ? 'active' : ''}`}
+            onClick={() => navigate('/about')}
           >
             About Us
           </button>
           <button 
-            className={`footer-btn-link ${currentPage === 'contact' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`footer-btn-link ${currentPath === '/contact' ? 'active' : ''}`}
+            onClick={() => navigate('/contact')}
           >
             Contact
           </button>
           <button 
-            className={`footer-btn-link ${currentPage === 'privacy' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`footer-btn-link ${currentPath === '/privacy' ? 'active' : ''}`}
+            onClick={() => navigate('/privacy')}
           >
             Privacy Policy
           </button>
           <button 
-            className={`footer-btn-link ${currentPage === 'terms' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`footer-btn-link ${currentPath === '/terms' ? 'active' : ''}`}
+            onClick={() => navigate('/terms')}
           >
             Terms of Service
           </button>

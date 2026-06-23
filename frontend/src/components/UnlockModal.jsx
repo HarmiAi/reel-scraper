@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck } from 'lucide-react';
 import AdPlaceholder from './AdPlaceholder.jsx';
+import { rewardedAdService } from '../services/rewardedAdService.js';
 
 const UnlockModal = ({ isOpen, onClose, onUnlock, qualityName }) => {
   const [countdown, setCountdown] = useState(3);
@@ -10,6 +11,17 @@ const UnlockModal = ({ isOpen, onClose, onUnlock, qualityName }) => {
     if (!isOpen) return;
     setCountdown(3);
     setIsUnlocked(false);
+
+    // Initialize and preload the rewarded ad stub
+    rewardedAdService.initialize();
+    rewardedAdService.preloadAd();
+
+    // Display the ad and listen to loaded events
+    rewardedAdService.showAd({
+      onAdLoaded: () => {
+        console.log('[Ad Service] Ad is successfully rendering.');
+      }
+    });
 
     const timer = setInterval(() => {
       setCountdown((prev) => {

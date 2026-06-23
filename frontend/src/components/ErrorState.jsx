@@ -1,23 +1,29 @@
 import React from 'react';
 import { AlertCircle, Lock, ShieldAlert, Ban, EyeOff, ArrowLeft } from 'lucide-react';
 
-const ErrorState = ({ errorType, customMessage, onReset }) => {
+const ErrorState = ({ errorType, customMessage, onReset, platform = 'instagram' }) => {
+  const isFb = platform === 'facebook';
+
   // Map error types to specific icons, titles, and descriptions
   const getErrorDetails = () => {
     switch (errorType) {
       case 'private_reel':
         return {
           icon: <Lock size={32} className="error-state-icon" />,
-          title: 'Private Reel Detected',
-          description: 'This video belongs to a private Instagram account. Lumina Reels cannot extract media from private accounts due to server access limitations and Instagram privacy controls.',
+          title: isFb ? 'Private Facebook Video Detected' : 'Private Reel Detected',
+          description: isFb 
+            ? 'This video belongs to a private Facebook profile or group. Lumina cannot extract media from private accounts due to privacy settings and access limitations.'
+            : 'This video belongs to a private Instagram account. Lumina Reels cannot extract media from private accounts due to server access limitations and Instagram privacy controls.',
           actionLabel: 'Try Another Link'
         };
       case 'unsupported_url':
         return {
           icon: <Ban size={32} className="error-state-icon" />,
           title: 'Unsupported URL Source',
-          description: 'Lumina Reels is strictly restricted to secure Instagram Reel, Post, or TV endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.',
-          actionLabel: 'Try Instagram Link'
+          description: isFb
+            ? 'Lumina is strictly restricted to secure Facebook Reel or Video endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.'
+            : 'Lumina Reels is strictly restricted to secure Instagram Reel, Post, or TV endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.',
+          actionLabel: isFb ? 'Try Facebook Link' : 'Try Instagram Link'
         };
       case 'rate_limited':
         return {
@@ -29,16 +35,20 @@ const ErrorState = ({ errorType, customMessage, onReset }) => {
       case 'reel_not_found':
         return {
           icon: <EyeOff size={32} className="error-state-icon" />,
-          title: 'Reel Not Found (404)',
-          description: 'The requested Instagram post could not be located. It may have been deleted by the owner, or there might be a typo in the URL path.',
+          title: isFb ? 'Facebook Video Not Found (404)' : 'Reel Not Found (404)',
+          description: isFb
+            ? 'The requested Facebook video or reel could not be located. It may have been deleted by the owner, or there might be a typo in the URL path.'
+            : 'The requested Instagram post could not be located. It may have been deleted by the owner, or there might be a typo in the URL path.',
           actionLabel: 'Verify URL and Try Again'
         };
       case 'invalid_url':
       default:
         return {
           icon: <AlertCircle size={32} className="error-state-icon" />,
-          title: 'Invalid Instagram URL',
-          description: customMessage || 'The URL format is invalid. Please verify the URL starts with https://instagram.com/ or https://www.instagram.com/ and references a /reel/, /p/, or /tv/ shortcode.',
+          title: isFb ? 'Invalid Facebook URL' : 'Invalid Instagram URL',
+          description: customMessage || (isFb
+            ? 'The URL format is invalid. Please verify the URL points to a public Facebook reel or video (e.g. facebook.com, fb.watch, fb.com).'
+            : 'The URL format is invalid. Please verify the URL starts with https://instagram.com/ or https://www.instagram.com/ and references a /reel/, /p/, or /tv/ shortcode.'),
           actionLabel: 'Check URL format'
         };
     }

@@ -6,6 +6,7 @@ import { connectDB } from './config/database.js';
 import reelRoutes from './routes/reelRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import historyRoutes from './routes/historyRoutes.js';
+import facebookRoutes from './routes/facebookRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { startCleanupJob } from './controllers/reelController.js';
 
@@ -45,6 +46,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/reels', reelRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/facebook', facebookRoutes);
 
 // Register 404 Route Not Found Handler
 app.use(notFound);
