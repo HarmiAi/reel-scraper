@@ -41,7 +41,7 @@ export const fetchFacebookData = async (url) => {
   return response.data;
 };
 
-export const downloadFacebookFile = async (videoUrl, fileName = 'lumina_facebook.mp4', quality = 'BEST', id = '') => {
+export const downloadFacebookFile = async (videoUrl, fileName = 'savetube_facebook.mp4', quality = 'BEST', id = '') => {
   if (!videoUrl) return false;
   try {
     const proxyUrl = `${API_BASE_URL}/api/facebook/downloadProxy?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(fileName)}&quality=${quality.toUpperCase()}&id=${encodeURIComponent(id)}`;

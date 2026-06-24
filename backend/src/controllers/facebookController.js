@@ -26,7 +26,7 @@ export const extractFacebookVideo = async (req, res, next) => {
 export const downloadFacebookProxy = async (req, res, next) => {
   const { url, name } = req.query;
   try {
-    const filename = name || 'lumina_facebook.mp4';
+    const filename = name || 'savetube_facebook.mp4';
     console.log(`[Facebook Proxy] Streaming video file: ${url}`);
     
     const mediaResponse = await fetch(url);

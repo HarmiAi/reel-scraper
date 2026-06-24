@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 /**
- * Lumina Reels — Instagram Downloader Service Layer (Axios Powered)
+ * The Save Tube — Instagram Downloader Service Layer (Axios Powered)
  * 
  * Communicates with the Express backend to extract real Instagram Reel metadata
  * and stream the files directly to the user's hard drive bypassing CORS limitations.
@@ -79,7 +79,7 @@ export const fetchReelData = async (url) => {
  * @param {string} fileName - File name to save as
  * @returns {Promise<boolean>}
  */
-export const downloadVideoFile = async (videoUrl, fileName = 'lumina_reel.mp4', quality = 'BEST', id = '') => {
+export const downloadVideoFile = async (videoUrl, fileName = 'savetube_reel.mp4', quality = 'BEST', id = '') => {
   if (!videoUrl) return false;
   
   try {

@@ -27,22 +27,22 @@ const TermsOfService = ({ navigate }) => {
           <p className="last-updated">Last Updated: June 21, 2026</p>
           
           <p>
-            Welcome to Lumina Reels. By accessing or using our streaming services, you agree to comply with and be bound by the following Terms of Service.
+            Welcome to The Save Tube. By accessing or using our streaming services, you agree to comply with and be bound by the following Terms of Service.
           </p>
 
           <h3>1. Fair Use & Scope of Utility</h3>
           <p>
-            Lumina Reels is provided strictly as a creator utility tool to index and proxy media nodes that are already made available publically by content creators on Instagram.
+            The Save Tube is provided strictly as a creator utility tool to index and proxy media nodes that are already made available publically by content creators on Instagram.
           </p>
           <ul>
             <li>You may only download Reels, Posts, and TV files that belong to public accounts.</li>
             <li>You must respect copyright laws and intellectual property of the respective content creators.</li>
-            <li>Lumina Reels does not grant license rights for downloaded assets. Usage is subject to the content owner's explicit permissions.</li>
+            <li>The Save Tube does not grant license rights for downloaded assets. Usage is subject to the content owner's explicit permissions.</li>
           </ul>
 
           <h3>2. Prohibited Actions</h3>
           <p>
-            As a user of Lumina Reels, you agree not to:
+            As a user of The Save Tube, you agree not to:
           </p>
           <ul>
             <li>Use the downloader to scrape media at an abusive scale that degrades our server nodes.</li>
@@ -52,7 +52,7 @@ const TermsOfService = ({ navigate }) => {
 
           <h3>3. Disclaimer of Liability</h3>
           <p>
-            Lumina Reels is provided "as is" and "as available". We do not guarantee uninterrupted operational status or permanent compatibility with Instagram's private CDN schemas. We are not responsible for any copyright violations committed by users during download caching.
+            The Save Tube is provided "as is" and "as available". We do not guarantee uninterrupted operational status or permanent compatibility with Instagram's private CDN schemas. We are not responsible for any copyright violations committed by users during download caching.
           </p>
 
           <h3>4. Term Revisions</h3>

@@ -41,9 +41,9 @@ export class FacebookExtractionService {
       } catch (e) {}
 
       // Decode the title/caption
-      let caption = decodeHtmlEntities(result.title) || 'Enjoy this public Facebook video. Saved using Lumina. ✨';
+      let caption = decodeHtmlEntities(result.title) || 'Enjoy this public Facebook video. Saved using The Save Tube. ✨';
       if (caption === 'Facebook') {
-        caption = 'Enjoy this public Facebook video. Saved using Lumina. ✨';
+        caption = 'Enjoy this public Facebook video. Saved using The Save Tube. ✨';
       }
       if (caption.length > 250) {
         caption = caption.substring(0, 247) + '...';

@@ -12,8 +12,8 @@ const ErrorState = ({ errorType, customMessage, onReset, platform = 'instagram' 
           icon: <Lock size={32} className="error-state-icon" />,
           title: isFb ? 'Private Facebook Video Detected' : 'Private Reel Detected',
           description: isFb 
-            ? 'This video belongs to a private Facebook profile or group. Lumina cannot extract media from private accounts due to privacy settings and access limitations.'
-            : 'This video belongs to a private Instagram account. Lumina Reels cannot extract media from private accounts due to server access limitations and Instagram privacy controls.',
+            ? 'This video belongs to a private Facebook profile or group. The Save Tube cannot extract media from private accounts due to privacy settings and access limitations.'
+            : 'This video belongs to a private Instagram account. The Save Tube cannot extract media from private accounts due to server access limitations and Instagram privacy controls.',
           actionLabel: 'Try Another Link'
         };
       case 'unsupported_url':
@@ -21,8 +21,8 @@ const ErrorState = ({ errorType, customMessage, onReset, platform = 'instagram' 
           icon: <Ban size={32} className="error-state-icon" />,
           title: 'Unsupported URL Source',
           description: isFb
-            ? 'Lumina is strictly restricted to secure Facebook Reel or Video endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.'
-            : 'Lumina Reels is strictly restricted to secure Instagram Reel, Post, or TV endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.',
+            ? 'The Save Tube is strictly restricted to secure Facebook Reel or Video endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.'
+            : 'The Save Tube is strictly restricted to secure Instagram Reel, Post, or TV endpoints. TikTok, YouTube, and other external domains are rejected for security and compliance.',
           actionLabel: isFb ? 'Try Facebook Link' : 'Try Instagram Link'
         };
       case 'rate_limited':

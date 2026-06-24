@@ -65,7 +65,7 @@ const FacebookDownloader = ({ navigate }) => {
   // Load history from localStorage (facebook-specific namespace)
   useEffect(() => {
     try {
-      const storedHistory = localStorage.getItem('lumina_facebook_history');
+      const storedHistory = localStorage.getItem('savetube_facebook_history');
       if (storedHistory) {
         setHistory(JSON.parse(storedHistory));
       }
@@ -77,7 +77,7 @@ const FacebookDownloader = ({ navigate }) => {
   // Load stats from localStorage (facebook-specific namespace)
   useEffect(() => {
     try {
-      const storedStats = localStorage.getItem('lumina_facebook_stats');
+      const storedStats = localStorage.getItem('savetube_facebook_stats');
       if (storedStats) {
         setStats(JSON.parse(storedStats));
       }
@@ -90,7 +90,7 @@ const FacebookDownloader = ({ navigate }) => {
   const saveHistory = (updatedHistory) => {
     setHistory(updatedHistory);
     try {
-      localStorage.setItem('lumina_facebook_history', JSON.stringify(updatedHistory));
+      localStorage.setItem('savetube_facebook_history', JSON.stringify(updatedHistory));
     } catch (e) {
       console.error("Failed to save Facebook history", e);
     }
@@ -100,7 +100,7 @@ const FacebookDownloader = ({ navigate }) => {
   const saveStats = (updatedStats) => {
     setStats(updatedStats);
     try {
-      localStorage.setItem('lumina_facebook_stats', JSON.stringify(updatedStats));
+      localStorage.setItem('savetube_facebook_stats', JSON.stringify(updatedStats));
     } catch (e) {
       console.error("Failed to save Facebook stats", e);
     }
@@ -188,7 +188,7 @@ const FacebookDownloader = ({ navigate }) => {
     if (!validateFacebookUrl(cleanedUrl)) {
       setErrorDetails({
         type: 'invalid_url',
-        message: 'Invalid Facebook URL format. Lumina supports public Facebook reels and video links.'
+        message: 'Invalid Facebook URL format. The Save Tube supports public Facebook reels and video links.'
       });
       showToast('Invalid URL path structure', 'error');
       return;
@@ -322,7 +322,7 @@ const FacebookDownloader = ({ navigate }) => {
     }, 700);
 
     try {
-      const filename = `lumina_fb_${reelData.id || 'video'}_${qualityKey.toLowerCase()}.mp4`;
+      const filename = `savetube_fb_${reelData.id || 'video'}_${qualityKey.toLowerCase()}.mp4`;
       const downloadUrl = (qualityKey === 'SD' && reelData.sdVideoUrl) 
         ? reelData.sdVideoUrl 
         : ((qualityKey === 'HD' && reelData.hdVideoUrl) ? reelData.hdVideoUrl : reelData.videoUrl);
@@ -503,7 +503,7 @@ const FacebookDownloader = ({ navigate }) => {
 
   const handleShareApp = () => {
     navigator.clipboard.writeText(window.location.origin);
-    showToast('Lumina link copied to clipboard!', 'success');
+    showToast('The Save Tube link copied to clipboard!', 'success');
   };
 
   const getFilteredHistory = () => {
@@ -900,7 +900,7 @@ const FacebookDownloader = ({ navigate }) => {
                       <button
                         className="btn-clay btn-clay-secondary"
                         style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', width: '100%' }}
-                        onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `lumina_fb_${reelData.id || 'video'}_cover.jpg`)}
+                        onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `savetube_fb_${reelData.id || 'video'}_cover.jpg`)}
                       >
                         <Download size={16} /> Download Cover Image
                       </button>
@@ -1029,7 +1029,7 @@ const FacebookDownloader = ({ navigate }) => {
                       title="Quick Download Again"
                       onClick={() => {
                         const qKey = (item.quality || '').includes('480') ? 'SD' : (item.quality || '').includes('720') ? 'HD' : 'BEST';
-                        handleDownloadMedia(item.videoUrl, `lumina_fb_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
+                        handleDownloadMedia(item.videoUrl, `savetube_fb_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
                       }}
                       aria-label={`Quick Download again for ${item.username}`}
                     >

@@ -9,7 +9,7 @@ const Footer = ({ navigate, currentPath }) => {
           <div className="logo-icon-clay">
             <Sparkles size={16} />
           </div>
-          <span className="logo-text text-gradient">Lumina Reels</span>
+          <span className="logo-text text-gradient">The Save Tube</span>
         </div>
         <div className="footer-links-grid">
           <button 
@@ -40,7 +40,7 @@ const Footer = ({ navigate, currentPath }) => {
       </div>
       <div className="footer-bottom">
         <p className="copyright-text" style={{ fontSize: '0.85rem' }}>
-          © 2026 Lumina Reels Creator Toolkit. Handcrafted with luxury minimalist aesthetics. All rights reserved.
+          © 2026 The Save Tube Creator Toolkit. Handcrafted with luxury minimalist aesthetics. All rights reserved.
         </p>
         <span className="footer-tagline">SaaS Creator Suite Concept</span>
       </div>

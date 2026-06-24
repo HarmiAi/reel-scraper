@@ -144,7 +144,7 @@ export const extractReel = async (req, res, next) => {
         if (!guestUser) {
           guestUser = await User.create({
             username: 'guest_user',
-            email: 'guest@lumina.reels'
+            email: 'guest@savetube.app'
           });
         }
 
@@ -224,7 +224,7 @@ export const downloadProxy = async (req, res, next) => {
   const { url, name, quality, id } = req.query;
 
   try {
-    const filename = name || 'lumina_reel.mp4';
+    const filename = name || 'savetube_reel.mp4';
     const targetQuality = (quality || 'BEST').toUpperCase();
 
     // Mapping quality parameter to local file suffix

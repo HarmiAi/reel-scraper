@@ -60,7 +60,7 @@ const DownloadSuccessScreen = ({ reelData, onReset, onViewHistory, onShareApp, q
           </button>
           
           <button className="btn-clay btn-clay-secondary success-option-btn" onClick={onShareApp}>
-            <Share2 size={16} /> Share Lumina
+            <Share2 size={16} /> Share The Save Tube
           </button>
         </div>
       </div>

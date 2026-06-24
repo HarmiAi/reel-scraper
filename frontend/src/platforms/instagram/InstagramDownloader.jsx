@@ -65,7 +65,7 @@ const InstagramDownloader = ({ navigate }) => {
   // Load history from localStorage
   useEffect(() => {
     try {
-      const storedHistory = localStorage.getItem('lumina_reel_history');
+      const storedHistory = localStorage.getItem('savetube_reel_history');
       if (storedHistory) {
         setHistory(JSON.parse(storedHistory));
       }
@@ -77,7 +77,7 @@ const InstagramDownloader = ({ navigate }) => {
   // Load stats from localStorage
   useEffect(() => {
     try {
-      const storedStats = localStorage.getItem('lumina_download_stats');
+      const storedStats = localStorage.getItem('savetube_download_stats');
       if (storedStats) {
         setStats(JSON.parse(storedStats));
       }
@@ -90,7 +90,7 @@ const InstagramDownloader = ({ navigate }) => {
   const saveHistory = (updatedHistory) => {
     setHistory(updatedHistory);
     try {
-      localStorage.setItem('lumina_reel_history', JSON.stringify(updatedHistory));
+      localStorage.setItem('savetube_reel_history', JSON.stringify(updatedHistory));
     } catch (e) {
       console.error("Failed to save history", e);
     }
@@ -100,7 +100,7 @@ const InstagramDownloader = ({ navigate }) => {
   const saveStats = (updatedStats) => {
     setStats(updatedStats);
     try {
-      localStorage.setItem('lumina_download_stats', JSON.stringify(updatedStats));
+      localStorage.setItem('savetube_download_stats', JSON.stringify(updatedStats));
     } catch (e) {
       console.error("Failed to save stats", e);
     }
@@ -188,7 +188,7 @@ const InstagramDownloader = ({ navigate }) => {
     if (!validateInstagramUrl(cleanedUrl)) {
       setErrorDetails({
         type: 'invalid_url',
-        message: 'Invalid Instagram URL format. Lumina supports public reel, post, and IGTV links.'
+        message: 'Invalid Instagram URL format. The Save Tube supports public reel, post, and IGTV links.'
       });
       showToast('Invalid URL path structure', 'error');
       return;
@@ -322,7 +322,7 @@ const InstagramDownloader = ({ navigate }) => {
     }, 700);
 
     try {
-      const filename = `lumina_${reelData.id || 'reel'}_${qualityKey.toLowerCase()}.mp4`;
+      const filename = `savetube_${reelData.id || 'reel'}_${qualityKey.toLowerCase()}.mp4`;
       const success = await downloadInstagramVideoFile(reelData.videoUrl, filename, qualityKey, reelData.id);
       
       clearInterval(stepInterval);
@@ -500,7 +500,7 @@ const InstagramDownloader = ({ navigate }) => {
 
   const handleShareApp = () => {
     navigator.clipboard.writeText(window.location.origin);
-    showToast('Lumina link copied to clipboard!', 'success');
+    showToast('The Save Tube link copied to clipboard!', 'success');
   };
 
   const getFilteredHistory = () => {
@@ -902,7 +902,7 @@ const InstagramDownloader = ({ navigate }) => {
                       <button
                         className="btn-clay btn-clay-secondary"
                         style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', width: '100%' }}
-                        onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `lumina_${reelData.id || 'reel'}_cover.jpg`)}
+                        onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `savetube_${reelData.id || 'reel'}_cover.jpg`)}
                       >
                         <Download size={16} /> Download Cover Image
                       </button>
@@ -1031,7 +1031,7 @@ const InstagramDownloader = ({ navigate }) => {
                       title="Quick Download Again"
                       onClick={() => {
                         const qKey = (item.quality || '').includes('480') ? 'SD' : (item.quality || '').includes('720') ? 'HD' : 'BEST';
-                        handleDownloadMedia(item.videoUrl, `lumina_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
+                        handleDownloadMedia(item.videoUrl, `savetube_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
                       }}
                       aria-label={`Quick Download again for ${item.username}`}
                     >

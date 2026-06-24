@@ -38,7 +38,7 @@ export const fetchInstagramReelData = async (url) => {
   return response.data;
 };
 
-export const downloadInstagramVideoFile = async (videoUrl, fileName = 'lumina_reel.mp4', quality = 'BEST', id = '') => {
+export const downloadInstagramVideoFile = async (videoUrl, fileName = 'savetube_reel.mp4', quality = 'BEST', id = '') => {
   if (!videoUrl) return false;
   try {
     const proxyUrl = `${API_BASE_URL}/api/reels/downloadProxy?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(fileName)}&quality=${quality.toUpperCase()}&id=${encodeURIComponent(id)}`;

@@ -18,9 +18,9 @@ const About = ({ navigate }) => {
       </div>
 
       <div className="clay-card page-card">
-        <h2 className="page-title text-gradient">About Lumina Reels</h2>
+        <h2 className="page-title text-gradient">About The Save Tube</h2>
         <p className="page-subtitle">
-          Lumina Reels is a state-of-the-art content toolkit engineered specifically for creators, editors, and social media professionals. We provide lossless stream extractions from Instagram node architecture.
+          The Save Tube is a state-of-the-art content toolkit engineered specifically for creators, editors, and social media professionals. We provide lossless stream extractions from social media platforms.
         </p>
 
         <div className="about-grid">

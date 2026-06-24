@@ -4,7 +4,7 @@ import { Clipboard, Sparkles, DownloadCloud } from 'lucide-react';
 const HowItWorks = () => {
   return (
     <section className="how-it-works-section">
-      <h2 className="how-it-works-heading">How Lumina Works</h2>
+      <h2 className="how-it-works-heading">How The Save Tube Works</h2>
       <p className="how-it-works-subheading">
         Extracting premium social media assets takes three simple, secure steps.
       </p>
@@ -15,9 +15,9 @@ const HowItWorks = () => {
           <div className="step-icon-clay">
             <Clipboard size={22} />
           </div>
-          <h3 className="step-title">Paste Instagram URL</h3>
+          <h3 className="step-title">Paste Video URL</h3>
           <p className="step-desc">
-            Copy the public Reel, Post, or TV link from Instagram and paste it in the secure input above.
+            Copy the public video or reel link and paste it in the secure input above.
           </p>
         </div>
 

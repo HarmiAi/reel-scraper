@@ -27,12 +27,12 @@ const PrivacyPolicy = ({ navigate }) => {
           <p className="last-updated">Last Updated: June 21, 2026</p>
           
           <p>
-            At Lumina Reels, we are dedicated to protecting your privacy and ensuring a transparent, secure environment. This Privacy Policy details the complete absence of data collection logs and the measures we employ to secure users.
+            At The Save Tube, we are dedicated to protecting your privacy and ensuring a transparent, secure environment. This Privacy Policy details the complete absence of data collection logs and the measures we employ to secure users.
           </p>
 
           <h3>1. Zero Data Collection Architecture</h3>
           <p>
-            Lumina Reels operates as a completely anonymous utility:
+            The Save Tube operates as a completely anonymous utility:
           </p>
           <ul>
             <li>We do <strong>not</strong> collect, harvest, or log any personal credentials or accounts.</li>
@@ -47,12 +47,12 @@ const PrivacyPolicy = ({ navigate }) => {
 
           <h3>3. External Platform API Nodes</h3>
           <p>
-            Lumina Reels is independent and has no official relationship with Instagram, Meta Inc., TikTok, or YouTube. When downloading public reels, you are interacting directly with official Instagram CDN servers.
+            The Save Tube is independent and has no official relationship with Instagram, Meta Inc., TikTok, or YouTube. When downloading public reels, you are interacting directly with official Instagram CDN servers.
           </p>
 
           <h3>4. Safety & Age Protection</h3>
           <p>
-            Lumina Reels is intended for creator utility. Because no data is collected, we do not monitor or maintain information about individual age brackets.
+            The Save Tube is intended for creator utility. Because no data is collected, we do not monitor or maintain information about individual age brackets.
           </p>
         </div>
       </div>

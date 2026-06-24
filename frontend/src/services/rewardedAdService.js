@@ -1,5 +1,5 @@
 /**
- * Lumina Reels — Future Rewarded Ad Integration Layer (AdSense / Sponsor Stubs)
+ * The Save Tube — Future Rewarded Ad Integration Layer (AdSense / Sponsor Stubs)
  * 
  * This service provides a clean abstraction layer for handling future ad integrations.
  * When real ad tags (like Google Publisher Tag or AdSense Rewarded Ads) are ready,

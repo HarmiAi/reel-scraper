@@ -100,7 +100,7 @@ const MobileActionSheet = ({ isOpen, onClose, reelData, onDownloadClick, onCopyC
             </div>
             <div className="sheet-action-details">
               <span className="sheet-action-title">Share Reel link</span>
-              <span className="sheet-action-sub">Copy sharing link for Lumina</span>
+              <span className="sheet-action-sub">Copy sharing link for The Save Tube</span>
             </div>
           </button>
 

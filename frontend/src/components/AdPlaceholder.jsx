@@ -12,7 +12,7 @@ const AdPlaceholder = ({ countdown }) => {
         <div className="ad-video-mock">
           <Play size={24} className="ad-play-icon" />
           <div className="ad-video-overlay">
-            <span className="ad-brand">Lumina Premium Creator Suite</span>
+            <span className="ad-brand">The Save Tube Premium Suite</span>
             <span className="ad-cta">Boost your social media presence with AI</span>
           </div>
         </div>

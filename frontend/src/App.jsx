@@ -55,7 +55,7 @@ const App = () => {
             <div className="logo-icon-clay">
               <Sparkles size={18} />
             </div>
-            <span className="text-gradient">Lumina Hub</span>
+            <span className="text-gradient">The Save Tube</span>
           </div>
           <div className="header-actions">
             <button 

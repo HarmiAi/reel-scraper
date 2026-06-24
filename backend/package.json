@@ -1,7 +1,7 @@
 {
-  "name": "lumina-reels-backend",
+  "name": "save-tube-backend",
   "version": "1.0.0",
-  "description": "Premium Instagram Reel Downloader MVC Backend",
+  "description": "The Save Tube MVC Backend",
   "main": "src/server.js",
   "type": "module",
   "scripts": {

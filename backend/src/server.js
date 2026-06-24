@@ -62,7 +62,7 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`=========================================`);
-      console.log(`🚀 LUMINA PREMIUM MVC BACKEND IS ACTIVE`);
+      console.log(`🚀 THE SAVE TUBE MVC BACKEND IS ACTIVE`);
       console.log(`➜  Local Host:  http://localhost:${PORT}`);
       console.log(`➜  Healthcheck: http://localhost:${PORT}/api/health`);
       console.log(`➜  Environment: ${process.env.NODE_ENV || 'development'}`);

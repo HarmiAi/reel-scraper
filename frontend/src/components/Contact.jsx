@@ -31,7 +31,7 @@ const Contact = ({ navigate }) => {
       </div>
 
       <div className="clay-card page-card contact-card">
-        <h2 className="page-title text-gradient">Connect with Lumina</h2>
+        <h2 className="page-title text-gradient">Connect with The Save Tube</h2>
         <p className="page-subtitle">
           Have ideas, feature requests, or technical integration questions? Drop our architectural engineering desk a message below.
         </p>

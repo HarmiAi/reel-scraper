@@ -49,7 +49,7 @@ const UnlockModal = ({ isOpen, onClose, onUnlock, qualityName }) => {
         <div className="modal-header-saas">
           <h3 className="modal-title-saas">Unlocking {qualityName} Quality</h3>
           <p className="modal-desc-saas">
-            Lumina is free. Premium bandwidth downloads (HD / Best) are sponsored by quick, secure ads.
+            The Save Tube is free. Premium bandwidth downloads (HD / Best) are sponsored by quick, secure ads.
           </p>
         </div>
 
