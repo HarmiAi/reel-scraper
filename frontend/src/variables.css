@@ -1,21 +1,21 @@
 :root {
-  /* Colors - Premium Light Green Shaded Claymorphic Theme */
-  --bg-color: #D9F5D7;               /* Pista green background */
-  --surface-color: #CFF0CC;          /* Sage green surface */
-  --card-bg: #DFF7DD;                 /* Soft mint/pista card background */
+  /* Colors - Premium Lighter Off-White Green Shaded Claymorphic Theme */
+  --bg-color: #F4FAF3;               /* Pale mint off-white background */
+  --surface-color: #E9F5E8;          /* Light slate sage green surface */
+  --card-bg: #FAFEFA;                 /* Crisp white-green card background */
   
-  --text-primary: #102418;           /* High-contrast deep forest green */
-  --text-secondary: #3D5545;         /* Muted slate forest green for accessibility */
-  --text-tertiary: #6E8E76;          /* Lighter slate green for subtle details */
+  --text-primary: #14291B;           /* Deep professional forest slate green */
+  --text-secondary: #4D6152;         /* Muted slate forest green for captions */
+  --text-tertiary: #7E9484;          /* Lighter slate details */
   
-  --primary-color: #74D68A;          /* Primary Accent (Vibrant Green) */
-  --primary-hover: #5EC075;          /* Hover green states */
-  --primary-light: rgba(116, 214, 138, 0.1);
+  --primary-color: #61D07A;          /* Primary Accent (Vibrant Green) */
+  --primary-hover: #4CBE66;          /* Hover green states */
+  --primary-light: rgba(97, 208, 122, 0.1);
   
-  --accent-color: #74D68A;
-  --accent-light: #9CE7AC;
-  --accent-soft: rgba(116, 214, 138, 0.1);
-  --accent-glow: rgba(116, 214, 138, 0.25);
+  --accent-color: #61D07A;
+  --accent-light: #8CE29F;
+  --accent-soft: rgba(97, 208, 122, 0.1);
+  --accent-glow: rgba(97, 208, 122, 0.25);
   
   --success-color: #10B981;          /* Emerald Green */
   --success-soft: rgba(16, 185, 129, 0.08);
@@ -39,22 +39,22 @@
   --radius-full: 9999px;
   
   /* Soft Neumorphic & Claymorphic Shadows */
-  --light-highlight: rgba(255, 255, 255, 0.95);
-  --dark-shadow: rgba(145, 180, 140, 0.42); /* Soft green-tinted dark shadow */
+  --light-highlight: rgba(255, 255, 255, 1.0);
+  --dark-shadow: rgba(165, 188, 161, 0.22); /* Extremely soft, professional green-grey shadow */
   
   --shadow-raised: 6px 6px 12px var(--dark-shadow), -6px -6px 12px var(--light-highlight);
   --shadow-sunken: inset 4px 4px 8px var(--dark-shadow), inset -4px -4px 8px var(--light-highlight);
-  --shadow-hover: 8px 8px 16px rgba(145, 180, 140, 0.52), -8px -8px 16px rgba(255, 255, 255, 0.98);
+  --shadow-hover: 8px 8px 16px rgba(165, 188, 161, 0.3), -8px -8px 16px rgba(255, 255, 255, 1.0);
   
   /* Soft shadows matched specifically to surface bases */
-  --shadow-card-raised: 6px 6px 12px rgba(145, 180, 140, 0.45), -6px -6px 12px rgba(255, 255, 255, 0.95);
-  --shadow-card-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
+  --shadow-card-raised: 6px 6px 12px rgba(165, 188, 161, 0.25), -6px -6px 12px rgba(255, 255, 255, 1.0);
+  --shadow-card-sunken: inset 4px 4px 8px rgba(165, 188, 161, 0.3), inset -4px -4px 8px rgba(255, 255, 255, 1.0);
   
-  --shadow-surface-raised: 6px 6px 12px rgba(145, 180, 140, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.95);
-  --shadow-surface-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.45), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
+  --shadow-surface-raised: 6px 6px 12px rgba(165, 188, 161, 0.22), -6px -6px 12px rgba(255, 255, 255, 1.0);
+  --shadow-surface-sunken: inset 4px 4px 8px rgba(165, 188, 161, 0.25), inset -4px -4px 8px rgba(255, 255, 255, 1.0);
   
-  --shadow-rose-raised: 6px 6px 12px rgba(145, 180, 140, 0.45), -6px -6px 12px rgba(255, 255, 255, 0.95);
-  --shadow-rose-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
+  --shadow-rose-raised: 6px 6px 12px rgba(165, 188, 161, 0.25), -6px -6px 12px rgba(255, 255, 255, 1.0);
+  --shadow-rose-sunken: inset 4px 4px 8px rgba(165, 188, 161, 0.3), inset -4px -4px 8px rgba(255, 255, 255, 1.0);
   
   /* Backwards Compatibility Mappings */
   --clay-bg: var(--card-bg);

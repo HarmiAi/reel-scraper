@@ -135,26 +135,26 @@
   background: linear-gradient(135deg, #87e79c 0%, #6bc77f 100%);
   color: var(--text-primary);
   box-shadow: 
-    6px 6px 12px rgba(145, 180, 140, 0.45), 
-    -6px -6px 12px rgba(255, 255, 255, 0.95), 
+    6px 6px 12px rgba(165, 188, 161, 0.25), 
+    -6px -6px 12px rgba(255, 255, 255, 1.0), 
     inset 2px 2px 4px rgba(255, 255, 255, 0.6), 
-    inset -2px -2px 4px rgba(16, 36, 24, 0.15);
+    inset -2px -2px 4px rgba(16, 36, 24, 0.12);
 }
 
 .btn-clay-primary:hover {
   background: linear-gradient(135deg, #91ebb4 0%, #74d68a 100%);
   transform: translateY(-1px);
   box-shadow: 
-    8px 8px 16px rgba(145, 180, 140, 0.55), 
-    -8px -8px 16px rgba(255, 255, 255, 0.95), 
+    8px 8px 16px rgba(165, 188, 161, 0.32), 
+    -8px -8px 16px rgba(255, 255, 255, 1.0), 
     inset 3px 3px 6px rgba(255, 255, 255, 0.75), 
-    inset -3px -3px 6px rgba(16, 36, 24, 0.12);
+    inset -3px -3px 6px rgba(16, 36, 24, 0.1);
 }
 
 .btn-clay-primary:active {
   transform: translateY(0);
   box-shadow: 
-    inset 4px 4px 8px rgba(16, 36, 24, 0.2), 
+    inset 4px 4px 8px rgba(16, 36, 24, 0.18), 
     inset -4px -4px 8px rgba(255, 255, 255, 0.35);
 }
 
@@ -167,7 +167,7 @@
 
 /* Secondary Button - Sage 3D Clay Button */
 .btn-clay-secondary {
-  background: linear-gradient(135deg, #e0f2dc 0%, #c4ecc0 100%);
+  background: linear-gradient(135deg, #f4faf3 0%, #e0f2dc 100%);
   color: var(--text-primary);
   box-shadow: var(--shadow-surface-raised);
 }
