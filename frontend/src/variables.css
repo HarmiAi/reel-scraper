@@ -1,60 +1,62 @@
 :root {
-  /* Colors - Premium Light Neumorphic Theme */
-  --bg-color: #F6F4E8;               /* Ivory cream background */
-  --surface-color: #E5EEE4;          /* Pastel sage/grey surface */
-  --card-bg: #C0E1D2;                 /* Soft mint/sage card background */
+  /* Colors - Premium Light Green Shaded Claymorphic Theme */
+  --bg-color: #D9F5D7;               /* Pista green background */
+  --surface-color: #CFF0CC;          /* Sage green surface */
+  --card-bg: #DFF7DD;                 /* Soft mint/pista card background */
   
-  --text-primary: #1E2B24;           /* Dark forest green for readability */
-  --text-secondary: #5A6E63;         /* Muted slate/sage green */
-  --text-tertiary: #A5B8AE;          /* Muted light green */
+  --text-primary: #102418;           /* High-contrast deep forest green */
+  --text-secondary: #3D5545;         /* Muted slate forest green for accessibility */
+  --text-tertiary: #6E8E76;          /* Lighter slate green for subtle details */
   
-  --primary-color: #C0E1D2;          /* Primary Accent (Dusty Rose) */
-  --primary-hover: #C0E1D2;          /* Softer rose for hover */
-  --primary-light: rgba(220, 155, 155, 0.08);
+  --primary-color: #74D68A;          /* Primary Accent (Vibrant Green) */
+  --primary-hover: #5EC075;          /* Hover green states */
+  --primary-light: rgba(116, 214, 138, 0.1);
   
-  --accent-color: #C0E1D2;
-  --accent-light: #C0E1D2;
-  --accent-soft: rgba(220, 155, 155, 0.08);
-  --accent-glow: rgba(220, 155, 155, 0.2);
+  --accent-color: #74D68A;
+  --accent-light: #9CE7AC;
+  --accent-soft: rgba(116, 214, 138, 0.1);
+  --accent-glow: rgba(116, 214, 138, 0.25);
   
-  --success-color: #10B981;
+  --success-color: #10B981;          /* Emerald Green */
   --success-soft: rgba(16, 185, 129, 0.08);
-  --error-color: #EF4444;
+  --error-color: #EF4444;            /* Ruby Red */
   --error-soft: rgba(239, 68, 68, 0.08);
+  --warning-color: #F59E0B;          /* Amber Orange */
+  --warning-soft: rgba(245, 158, 11, 0.08);
   
   /* Font & Spacing */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --tracking-wide: 0.03em;
-  --tracking-wider: 0.05em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.04em;
   --tracking-tight: -0.02em;
   
   /* Border Radiuses */
   --radius-xs: 6px;
   --radius-sm: 10px;
-  --radius-md: 16px;                 /* Buttons radius */
-  --radius-lg: 18px;                 /* URL Input & Cards radius */
+  --radius-md: 16px;                 /* Buttons & small components */
+  --radius-lg: 18px;                 /* URL Input, Selectors, and Cards */
   --radius-xl: 26px;
   --radius-full: 9999px;
   
-  /* Soft Neumorphic Shadows (Highlights & Delicate shadows) */
+  /* Soft Neumorphic & Claymorphic Shadows */
   --light-highlight: rgba(255, 255, 255, 0.95);
-  --dark-shadow: rgba(170, 165, 140, 0.25); /* Beige-tinted dark shadow for ivory */
+  --dark-shadow: rgba(145, 180, 140, 0.42); /* Soft green-tinted dark shadow */
   
   --shadow-raised: 6px 6px 12px var(--dark-shadow), -6px -6px 12px var(--light-highlight);
   --shadow-sunken: inset 4px 4px 8px var(--dark-shadow), inset -4px -4px 8px var(--light-highlight);
-  --shadow-hover: 8px 8px 16px rgba(170, 165, 140, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.98);
+  --shadow-hover: 8px 8px 16px rgba(145, 180, 140, 0.52), -8px -8px 16px rgba(255, 255, 255, 0.98);
   
   /* Soft shadows matched specifically to surface bases */
-  --shadow-card-raised: 6px 6px 12px rgba(135, 170, 155, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.9);
-  --shadow-card-sunken: inset 4px 4px 8px rgba(135, 170, 155, 0.35), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --shadow-card-raised: 6px 6px 12px rgba(145, 180, 140, 0.45), -6px -6px 12px rgba(255, 255, 255, 0.95);
+  --shadow-card-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
   
-  --shadow-surface-raised: 6px 6px 12px rgba(165, 185, 160, 0.3), -6px -6px 12px rgba(255, 255, 255, 0.9);
-  --shadow-surface-sunken: inset 4px 4px 8px rgba(165, 185, 160, 0.35), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --shadow-surface-raised: 6px 6px 12px rgba(145, 180, 140, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.95);
+  --shadow-surface-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.45), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
   
-  --shadow-rose-raised: 6px 6px 12px rgba(180, 130, 130, 0.35), -6px -6px 12px rgba(255, 255, 255, 0.6);
-  --shadow-rose-sunken: inset 3px 3px 6px rgba(130, 80, 80, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+  --shadow-rose-raised: 6px 6px 12px rgba(145, 180, 140, 0.45), -6px -6px 12px rgba(255, 255, 255, 0.95);
+  --shadow-rose-sunken: inset 4px 4px 8px rgba(145, 180, 140, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.95);
   
-  /* Legacy compatibility overrides */
+  /* Backwards Compatibility Mappings */
   --clay-bg: var(--card-bg);
   --clay-shadow-outer: var(--shadow-card-raised);
   --clay-shadow-inner: none;
@@ -65,12 +67,12 @@
   --clay-btn-hover-shadow: var(--shadow-hover);
   --clay-btn-active-shadow: var(--shadow-surface-sunken);
   
-  /* Ambient Lights - Airy Ivory glows */
+  /* Ambient Lights - Muted backdrop glows */
   --glow-circle-1: rgba(255, 255, 255, 0.4);
-  --glow-circle-2: rgba(229, 238, 228, 0.3);
-  --glow-circle-3: rgba(192, 225, 210, 0.2);
+  --glow-circle-2: rgba(207, 240, 204, 0.35);
+  --glow-circle-3: rgba(223, 247, 221, 0.25);
   
   /* Transitions */
-  --transition-smooth: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --transition-fast: all 0.12s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-smooth: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
 }

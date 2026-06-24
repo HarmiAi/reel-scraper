@@ -1,10 +1,10 @@
-/* Clean visual animations for premium UI interaction */
+/* Professional SaaS Interactions & Micro-Animations */
 
-/* Elegant fade-in up for landing page entry */
+/* Clean fade-in up for page/dialog entry */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
@@ -12,10 +12,10 @@
   }
 }
 
-/* Linear scale fade entrance for dialogs/cards */
+/* Linear scale fade entrance for results cards */
 @keyframes success-pop {
   0% {
-    transform: scale(0.97);
+    transform: scale(0.985);
     opacity: 0;
   }
   100% {
@@ -24,10 +24,10 @@
   }
 }
 
-/* Toast notifications clean entrance */
+/* Toast notifications entrance slide */
 @keyframes slide-in-right {
   0% {
-    transform: translateY(8px);
+    transform: translateY(6px);
     opacity: 0;
   }
   100% {
@@ -36,16 +36,16 @@
   }
 }
 
-/* Background drift light movements for gradient blobs (slow and atmospheric) */
+/* Background drift light movements (slow and subtle) */
 @keyframes drift-light-1 {
   0% {
     transform: translate(0px, 0px) scale(1);
   }
   33% {
-    transform: translate(15px, -20px) scale(1.05);
+    transform: translate(10px, -15px) scale(1.03);
   }
   66% {
-    transform: translate(-10px, 10px) scale(0.97);
+    transform: translate(-8px, 8px) scale(0.98);
   }
   100% {
     transform: translate(0px, 0px) scale(1);
@@ -57,46 +57,50 @@
     transform: translate(0px, 0px) scale(1);
   }
   50% {
-    transform: translate(-20px, 15px) scale(1.08);
+    transform: translate(-15px, 10px) scale(1.05);
   }
   100% {
     transform: translate(0px, 0px) scale(1);
   }
 }
 
-/* Legacy stubs - kept static to prevent floating motion on UI elements */
-@keyframes clay-float {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes clay-float-delayed {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes morph-clay {
-  0% { border-radius: 50%; }
-  100% { border-radius: 50%; }
-}
-
-@keyframes clay-pulse {
-  0% { opacity: 0.8; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.8; }
-}
-
-@keyframes shimmer-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes skeleton-pulse-glow {
-  0% {
-    background-position: 200% 0;
+/* Modern spin for SaaS loading spinners */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  100% {
+}
+
+/* Skeleton shimmer loading sweep */
+@keyframes shimmer-sweep {
+  0% {
     background-position: -200% 0;
   }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
+/* Subtle pulse for background loading */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Legacy stubs - mapped static to prevent visual layout jumps */
+@keyframes clay-float {
+  0%, 100% { transform: translateY(0); }
+}
+@keyframes clay-float-delayed {
+  0%, 100% { transform: translateY(0); }
+}
+@keyframes morph-clay {
+  0%, 100% { border-radius: var(--radius-md); }
+}
+@keyframes clay-pulse {
+  0%, 100% { opacity: 1; }
+}

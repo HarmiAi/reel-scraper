@@ -1,4 +1,4 @@
-/* Global Reset & Base Setup */
+/* Global Resets & Accessible Defaults */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -9,18 +9,25 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #F6F4E8;
+  background-color: var(--bg-color);
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* Custom Neumorphic Scrollbars */
+/* Keyboard Focus States for Accessibility */
+*:focus-visible {
+  outline: 2.5px solid var(--primary-color);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(116, 214, 138, 0.35);
+}
+
+/* Premium Light Green Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -30,26 +37,27 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--text-tertiary);
   border-radius: var(--radius-full);
+  border: 2px solid var(--bg-color);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
 
-/* Premium Noise Grain Overlay */
+/* Subtle Premium Noise Grain Overlay */
 .grain-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  opacity: 0.015; /* Subtle noise overlay */
+  opacity: 0.015;
   pointer-events: none;
   z-index: 9999;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Background Particle Canvas */
+/* Background Particle Canvas backdrop */
 .particle-canvas {
   position: fixed;
   top: 0;
@@ -58,10 +66,10 @@ body {
   height: 100vh;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.1;
+  opacity: 0.08;
 }
 
-/* Floating Ambient Lights - Soft Green Depth */
+/* Floating Ambient Lights - Soft, organic Green Depth */
 .ambient-glow-container {
   position: fixed;
   top: 0;
@@ -78,39 +86,40 @@ body {
   border-radius: var(--radius-full);
   filter: blur(140px);
   pointer-events: none;
+  will-change: transform;
 }
 
 .glow-circle-1 {
   top: -10%;
-  left: 15%;
-  width: 45vw;
-  height: 45vw;
+  left: 10%;
+  width: 50vw;
+  height: 50vw;
   background-color: var(--glow-circle-1);
-  opacity: 0.45;
+  opacity: 0.6;
   animation: drift-light-1 30s infinite ease-in-out;
 }
 
 .glow-circle-2 {
-  bottom: -15%;
-  right: 10%;
-  width: 50vw;
-  height: 50vw;
+  bottom: -10%;
+  right: 5%;
+  width: 55vw;
+  height: 55vw;
   background-color: var(--glow-circle-2);
-  opacity: 0.4;
+  opacity: 0.5;
   animation: drift-light-2 35s infinite ease-in-out;
 }
 
 .glow-circle-3 {
-  top: 25%;
-  left: 45%;
+  top: 30%;
+  left: 40%;
   transform: translate(-50%, -50%);
-  width: 35vw;
-  height: 35vw;
+  width: 40vw;
+  height: 40vw;
   background-color: var(--glow-circle-3);
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
-/* Layout System */
+/* Layout Container */
 .app-container {
   position: relative;
   z-index: 2;
@@ -119,54 +128,57 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 1.5rem 1.5rem 3rem 1.5rem;
-  max-width: 1200px;
+  padding: 2rem 1.5rem 4rem 1.5rem;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
-/* Typography Hierarchy */
+/* Modern Typography Scale */
 h1 {
-  font-size: clamp(2.25rem, 5vw, 3.25rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.25rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
   color: var(--text-primary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 h2 {
-  font-size: clamp(1.5rem, 3vw, 1.85rem);
-  font-weight: 600;
+  font-size: clamp(1.4rem, 3vw, 1.75rem);
+  font-weight: 700;
   line-height: 1.25;
-  letter-spacing: -0.025em;
+  letter-spacing: var(--tracking-tight);
   color: var(--text-primary);
 }
 
 h3 {
-  font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
   font-weight: 600;
+  line-height: 1.35;
   color: var(--text-primary);
 }
 
 p {
   font-size: 0.95rem;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 /* Helper Utilities */
 .text-gradient {
-  background: linear-gradient(180deg, var(--text-primary) 40%, var(--primary-color) 100%);
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--primary-hover) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-weight: 800;
 }
 
 .subtitle {
-  font-size: 0.95rem;
-  max-width: 480px;
+  font-size: 1rem;
+  max-width: 540px;
   text-align: center;
   color: var(--text-secondary);
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
