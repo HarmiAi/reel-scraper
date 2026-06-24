@@ -70,13 +70,13 @@ const Dashboard = ({ navigate }) => {
           Premium Hub Dashboard
         </div>
         
-        <h1 className="hero-heading">
+        <h1 className="hero-heading" style={{ fontSize: 'clamp(1.75rem, 4.5vw, 2.5rem)', lineHeight: 1.15, marginBottom: '0.4rem' }}>
           Download Reels From <br />
           <span className="text-gradient">Multiple Platforms</span>
         </h1>
         
-        <p className="hero-subheading subtitle">
-          Fast, secure, high-quality reel downloads with premium creator tools. Choose a platform to begin.
+        <p className="hero-subheading subtitle" style={{ marginBottom: '1rem', fontSize: '0.9rem', maxWidth: '480px' }}>
+          Fast, secure, high-quality reel downloads. Choose a platform to begin.
         </p>
 
         {/* Mascot */}

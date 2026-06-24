@@ -8,7 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .logo-container {
@@ -56,7 +56,7 @@
   font-weight: 700;
   color: var(--text-secondary);
   box-shadow: var(--shadow-card-raised);
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .badge-dot {
@@ -73,7 +73,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   z-index: 2;
   position: relative;
   width: 100%;
@@ -1516,19 +1516,19 @@
 .platform-selection-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+  gap: 1.25rem;
   width: 100%;
   max-width: 800px;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   margin-bottom: 3.5rem;
   z-index: 2;
 }
 
 .platform-card {
-  padding: 2.25rem 2rem;
+  padding: 1.5rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   cursor: pointer;
   text-align: left;
   transition: var(--transition-smooth);

@@ -538,19 +538,18 @@ const FacebookDownloader = ({ navigate }) => {
       </div>
 
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-badge">
+      <section className="hero-section" style={{ marginBottom: '0.75rem' }}>
+        <div className="hero-badge" style={{ marginBottom: '0.4rem' }}>
           <span className="badge-dot"></span>
           Facebook Video Downloader
         </div>
         
-        <h1 className="hero-heading">
-          Download Facebook Reels <br />
-          <span className="text-gradient">Instantly</span>
+        <h1 className="hero-heading" style={{ fontSize: 'clamp(1.5rem, 4.5vw, 2rem)', lineHeight: 1.15, marginBottom: '0.25rem' }}>
+          Download Facebook Reels
         </h1>
         
-        <p className="hero-subheading subtitle">
-          Save public Facebook reels and videos in high quality with a fast, secure, creator-friendly experience.
+        <p className="hero-subheading subtitle" style={{ marginBottom: '0.5rem', fontSize: '0.9rem', maxWidth: '480px' }}>
+          Paste the link below to extract your video instantly.
         </p>
 
         {/* Mascot */}
@@ -565,9 +564,6 @@ const FacebookDownloader = ({ navigate }) => {
           </div>
         </div>
       </section>
-
-      {/* Animated downloaded counter */}
-      <AnimatedCounter target={8249} />
 
       {/* Downloader Card */}
       <div id="downloader-card-anchor" className="downloader-card-container">
@@ -931,6 +927,9 @@ const FacebookDownloader = ({ navigate }) => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Animated downloaded counter */}
+      <AnimatedCounter target={8249} />
 
       {/* Local Statistics/Analytics Dashboard */}
       <AnalyticsCards stats={stats} />
