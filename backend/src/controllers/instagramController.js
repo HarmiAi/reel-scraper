@@ -1,5 +1,5 @@
 import { InstagramExtractionService } from '../services/instagramExtractionService.js';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import fs from 'fs';
@@ -57,37 +57,96 @@ export const downloadProxy = async (req, res, next) => {
 
     const localFilePath = id ? path.join(tempDir, `${id}_${qualityKey}.mp4`) : null;
 
+    // Check cached pre-transcoded file
     if (localFilePath && fs.existsSync(localFilePath)) {
-      console.log(`[Instagram DownloadProxy] Serving pre-transcoded file: ${localFilePath}`);
-      return res.download(localFilePath, filename, (err) => {
-        if (err) {
-          console.error('[Instagram DownloadProxy] Error serving file:', err.message);
-        } else {
-          console.log('[Instagram DownloadProxy] Successfully served', localFilePath);
-        }
-        setTimeout(() => {
-          fs.unlink(localFilePath, (unlinkErr) => {
-            if (unlinkErr && unlinkErr.code !== 'ENOENT') {
-              console.error('[Instagram DownloadProxy] Failed to delete cache:', unlinkErr.message);
-            }
-          });
-        }, 15000);
-      });
+      const cachedStats = fs.statSync(localFilePath);
+      if (cachedStats.size === 0) {
+        console.error(`[Instagram DownloadProxy Error] Cached file size is 0 bytes: ${localFilePath}`);
+        try {
+          fs.unlinkSync(localFilePath);
+        } catch (unlinkErr) {}
+      } else {
+        console.log(`[Instagram DownloadProxy] Serving pre-transcoded file: ${localFilePath} (${cachedStats.size} bytes)`);
+        return res.download(localFilePath, filename, (err) => {
+          if (err) {
+            console.error('[Instagram DownloadProxy Error] Error serving file:', err.message);
+          } else {
+            console.log('[Instagram DownloadProxy] Successfully served', localFilePath);
+          }
+          setTimeout(() => {
+            fs.unlink(localFilePath, (unlinkErr) => {
+              if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+                console.error('[Instagram DownloadProxy Error] Failed to delete cache:', unlinkErr.message);
+              }
+            });
+          }, 15000);
+        });
+      }
     }
 
     if (!url) {
-      return res.status(404).send('Transcoded file not found, and no fallback URL was provided.');
+      console.error('[Instagram DownloadProxy Error] Download request missing url parameter.');
+      return res.status(400).send('URL query parameter is required.');
+    }
+
+    // Pre-verify the CDN URL using a premium browser User-Agent
+    console.log(`[Instagram DownloadProxy] Pre-verifying video stream URL: ${url}`);
+    const mediaResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'identity'
+      }
+    });
+
+    console.log(`[Instagram DownloadProxy Verify] CDN HTTP status: ${mediaResponse.status}`);
+
+    if (!mediaResponse.ok) {
+      const errorMsg = `Instagram CDN stream check failed: ${mediaResponse.status}`;
+      console.error(`[Instagram DownloadProxy Error] ${errorMsg}`);
+      return res.status(mediaResponse.status).send(errorMsg);
+    }
+
+    const contentType = mediaResponse.headers.get('content-type') || '';
+    const contentLength = mediaResponse.headers.get('content-length');
+
+    console.log(`[Instagram DownloadProxy Verify] Content-Type: ${contentType}`);
+    console.log(`[Instagram DownloadProxy Verify] Content-Length: ${contentLength} bytes`);
+
+    // Verify it is indeed returning video streams or octet-stream
+    if (contentType && !contentType.startsWith('video/') && !contentType.includes('octet-stream') && !contentType.includes('mp4')) {
+      const typeError = `Media URL is not a valid video stream. Content-Type: ${contentType}`;
+      console.error(`[Instagram DownloadProxy Error] ${typeError}`);
+      return res.status(400).send(typeError);
     }
 
     if (qualityKey === 'high') {
       console.log('[Instagram DownloadProxy] Streaming original High CDN URL directly.');
-      const mediaResponse = await fetch(url);
-      if (!mediaResponse.ok) {
-        throw new Error(`CDN returned status ${mediaResponse.status}`);
-      }
+      
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Content-Type', contentType || 'video/mp4');
+      if (contentLength && parseInt(contentLength, 10) > 0) {
+        res.setHeader('Content-Length', contentLength);
+      }
+
+      console.log(`[Instagram DownloadProxy Stream] Initializing byte transfer to client. Filename: ${filename}`);
+
+      let bytesTransferred = 0;
       const nodeStream = Readable.fromWeb(mediaResponse.body);
+
+      nodeStream.on('data', (chunk) => {
+        bytesTransferred += chunk.length;
+      });
+
+      nodeStream.on('end', () => {
+        console.log(`[Instagram DownloadProxy Stream Finished] Successfully transferred ${bytesTransferred} bytes for ${filename}`);
+      });
+
+      nodeStream.on('error', (err) => {
+        console.error(`[Instagram DownloadProxy Stream Error] Socket error during transfer of ${filename}:`, err.message);
+      });
+
       return nodeStream.pipe(res);
     }
 
@@ -97,6 +156,10 @@ export const downloadProxy = async (req, res, next) => {
     res.setHeader('Content-Type', 'video/mp4');
 
     let command = ffmpeg(url)
+      // Inject browser User-Agent to prevent FFmpeg request from being blocked with a 403
+      .inputOptions([
+        '-user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"'
+      ])
       .format('mp4')
       .outputOptions([
         '-movflags frag_keyframe+empty_moov',
@@ -128,12 +191,23 @@ export const downloadProxy = async (req, res, next) => {
         ]);
     }
 
-    command.pipe(res, { end: true });
+    const monitor = new PassThrough();
+    let bytesTransferred = 0;
+    
+    monitor.on('data', (chunk) => {
+      bytesTransferred += chunk.length;
+    });
+
+    monitor.on('end', () => {
+      console.log(`[Instagram Transcode Stream Finished] Successfully transferred ${bytesTransferred} bytes for ${filename}`);
+    });
+
+    command.pipe(monitor).pipe(res);
 
   } catch (err) {
-    console.error('[Instagram DownloadProxy] Failed:', err.message);
+    console.error('[Instagram DownloadProxy Failed]', err);
     if (!res.headersSent) {
-      next(err);
+      res.status(500).send(`Instagram download proxy error: ${err.message}`);
     }
   }
 };

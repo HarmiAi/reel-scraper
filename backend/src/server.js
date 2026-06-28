@@ -7,6 +7,7 @@ import reelRoutes from './routes/reelRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import historyRoutes from './routes/historyRoutes.js';
 import facebookRoutes from './routes/facebookRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { startCleanupJob } from './controllers/instagramController.js';
 
@@ -47,6 +48,7 @@ app.use('/api/reels', reelRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/facebook', facebookRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Register 404 Route Not Found Handler
 app.use(notFound);

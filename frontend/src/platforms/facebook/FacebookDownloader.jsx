@@ -325,14 +325,7 @@ const FacebookDownloader = ({ navigate }) => {
       const qualityLabel = qualityKey === 'BEST' ? 'High' : qualityKey === 'HD' ? 'Medium' : 'Low';
       const filename = `savetube_${data.id || 'video'}_${qualityKey.toLowerCase()}.mp4`;
 
-      // Trigger actual download proxy stream
-      await downloadFacebookFile(data.videoUrl, filename, qualityKey, data.id);
-
-      // Record download stats
-      const counts = {};
-      let maxCount = 0;
-      let mostDownloaded = stats.mostDownloadedCreator || 'None';
-
+      // Record download history initial item
       const itemInHistory = {
         id: data.id,
         username: data.username,
@@ -352,30 +345,44 @@ const FacebookDownloader = ({ navigate }) => {
       updatedHistory = [itemInHistory, ...updatedHistory].slice(0, 20);
       saveHistory(updatedHistory);
 
-      updatedHistory.forEach(item => {
-        if (item.username) {
-          counts[item.username] = (counts[item.username] || 0) + 1;
-        }
-      });
+      if (qualityKey === 'SD') {
+        // Trigger actual download proxy stream immediately for SD
+        await downloadFacebookFile(data.videoUrl, filename, qualityKey, data.id);
 
-      Object.keys(counts).forEach(username => {
-        if (counts[username] > maxCount) {
-          maxCount = counts[username];
-          mostDownloaded = `@${username}`;
-        }
-      });
+        const counts = {};
+        let maxCount = 0;
+        let mostDownloaded = stats.mostDownloadedCreator || 'None';
 
-      const updatedStats = {
-        total: stats.total + 1,
-        hd: (qualityKey === 'HD' || qualityKey === 'BEST') ? stats.hd + 1 : stats.hd,
-        sd: qualityKey === 'SD' ? stats.sd + 1 : stats.sd,
-        mostDownloadedCreator: mostDownloaded
-      };
-      saveStats(updatedStats);
+        updatedHistory.forEach(item => {
+          if (item.username) {
+            counts[item.username] = (counts[item.username] || 0) + 1;
+          }
+        });
 
-      setDownloadSuccessData({ reelData: data, qualityName: qualityLabel });
-      setIsLoading(false);
-      showToast('Download started successfully!', 'success');
+        Object.keys(counts).forEach(username => {
+          if (counts[username] > maxCount) {
+            maxCount = counts[username];
+            mostDownloaded = `@${username}`;
+          }
+        });
+
+        const updatedStats = {
+          total: stats.total + 1,
+          hd: stats.hd,
+          sd: stats.sd + 1,
+          mostDownloadedCreator: mostDownloaded
+        };
+        saveStats(updatedStats);
+
+        setDownloadSuccessData({ reelData: data, qualityName: qualityLabel });
+        setIsLoading(false);
+        showToast('Download started successfully!', 'success');
+      } else {
+        // Show ad countdown placeholder for premium bandwidth downloads
+        setPendingQuality({ key: qualityKey, label: qualityLabel });
+        setIsUnlockModalOpen(true);
+        setIsLoading(false);
+      }
 
     } catch (err) {
       setIsLoading(false);
