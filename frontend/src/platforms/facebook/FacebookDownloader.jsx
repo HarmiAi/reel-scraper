@@ -846,134 +846,137 @@ const FacebookDownloader = ({ navigate }) => {
                   className="success-card"
                   style={{ width: '100%' }}
                 >
-                  {/* Media Thumbnail Column */}
-                  <div className="success-thumbnail-wrapper">
-                    {isPlayingPreview ? (
-                      <video
-                        src={reelData.videoUrl}
-                        className="success-thumbnail"
-                        controls
-                        autoPlay
-                        playsInline
-                        style={{ objectFit: 'contain', background: '#000' }}
-                      />
-                    ) : (
-                      <>
-                        <img 
-                          src={reelData.thumbnailUrl} 
-                          alt="" 
-                          className="success-thumbnail" 
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = FALLBACK_THUMBNAIL;
-                          }}
+                  {/* Left Column: Media Preview & Meta details */}
+                  <div className="success-preview-column">
+                    <div className="success-thumbnail-wrapper">
+                      {isPlayingPreview ? (
+                        <video
+                          src={reelData.videoUrl}
+                          className="success-thumbnail"
+                          controls
+                          autoPlay
+                          playsInline
+                          style={{ objectFit: 'contain', background: '#000' }}
                         />
-                        <button 
-                          className="thumbnail-play-overlay"
-                          onClick={() => setIsPlayingPreview(true)}
-                          aria-label="Play video preview"
-                        >
-                          <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <img 
+                            src={reelData.thumbnailUrl} 
+                            alt="" 
+                            className="success-thumbnail" 
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = FALLBACK_THUMBNAIL;
+                            }}
+                          />
+                          <button 
+                            className="thumbnail-play-overlay"
+                            onClick={() => setIsPlayingPreview(true)}
+                            aria-label="Play video preview"
+                          >
+                            <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
+                          </button>
+                        </>
+                      )}
+                      {reelData.duration && (
+                        <span className="thumbnail-duration">{reelData.duration}</span>
+                      )}
+                    </div>
 
-                  {/* Info and Quality selections */}
-                  <div className="success-details">
-                    <div className="creator-profile">
-                      <div className="creator-avatar-clay">
+                    {/* Platform Badge */}
+                    <div className="media-platform-badge facebook-badge">
+                      <span className="badge-dot" style={{ background: '#1877f2' }}></span>
+                      Facebook Video
+                    </div>
+
+                    {/* Creator Account Card */}
+                    <div className="creator-profile-mini">
+                      <div className="creator-avatar-clay-mini">
                         <img 
                           src={reelData.avatarUrl} 
                           alt="" 
-                          className="creator-avatar" 
+                          className="creator-avatar-mini" 
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                           }}
                         />
                       </div>
-                      <div className="creator-meta">
-                        <div className="creator-name-row">
-                          <span className="creator-username">@{reelData.username}</span>
-                          {reelData.verified && <CheckCircle size={14} className="verified-icon" />}
-                        </div>
-                        <span className="creator-followers">Creator Account</span>
+                      <div className="creator-meta-mini">
+                        <span className="creator-username-mini">@{reelData.username}</span>
+                        {reelData.verified && <CheckCircle size={12} className="verified-icon-mini" />}
                       </div>
                     </div>
 
-                    <p className="success-caption">{reelData.caption || 'Enjoy this public Facebook video.'}</p>
+                    {/* Short Caption */}
+                    <p className="media-caption-mini" title={reelData.caption}>
+                      {reelData.caption ? (reelData.caption.length > 80 ? reelData.caption.substring(0, 77) + '...' : reelData.caption) : 'Enjoy this public Facebook video.'}
+                    </p>
 
-                    <div className="reel-statistics-grid">
-                      <div className="stat-item-clay">
-                        <Heart size={14} className="stat-icon" />
-                        <div className="stat-info">
-                          <span className="stat-label">Likes</span>
-                          <span className="stat-value">{reelData.likes || 'N/A'}</span>
-                        </div>
-                      </div>
-                      <div className="stat-item-clay">
-                        <MessageCircle size={14} className="stat-icon" />
-                        <div className="stat-info">
-                          <span className="stat-label">Comments</span>
-                          <span className="stat-value">{reelData.comments || 'N/A'}</span>
-                        </div>
-                      </div>
+                    {/* Quality Count Tag */}
+                    <div className="quality-count-tag">
+                      <Sparkles size={12} style={{ color: 'var(--primary-color)' }} />
+                      <span>3 Download Formats Ready</span>
                     </div>
+                  </div>
 
-                    {/* Quality Selector */}
-                    <div className="quality-selector-container">
-                      <h4 className="quality-title-saas">Select Download Quality</h4>
-                      <div className="quality-grid-saas">
-                        
-                        {/* Best Quality Card */}
-                        <div 
-                          className={`clay-card quality-card-saas card-best ${activeQuality === 'BEST' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('BEST')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-best">Best</span>
-                          <span className="quality-res-saas">Best Available Quality (1080p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
-                            <span>MP4 Format</span>
-                          </div>
+                  {/* Right Column: Download Actions & Quality selectors */}
+                  <div className="success-details-column">
+                    <h4 className="quality-title-saas-premium">Select Download Quality</h4>
+                    
+                    <div className="quality-grid-saas-premium">
+                      {/* Best Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-best-premium ${activeQuality === 'BEST' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('BEST')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                      >
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-best-premium">Best</span>
+                          <span className="quality-res-saas-premium">High (1080p)</span>
                         </div>
-
-                        {/* HD Quality Card */}
-                        <div 
-                          className={`clay-card quality-card-saas card-hd ${activeQuality === 'HD' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('HD')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-hd">HD</span>
-                          <span className="quality-res-saas">HD Quality (720p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
-                            <span>MP4 Format</span>
-                          </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
                         </div>
+                      </div>
 
-                        {/* SD Quality Card */}
-                        <div 
-                          className={`clay-card quality-card-saas card-sd ${activeQuality === 'SD' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('SD')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-sd">SD</span>
-                          <span className="quality-res-saas">SD Quality (480p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
-                            <span>MP4 Format</span>
-                          </div>
+                      {/* HD Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-hd-premium ${activeQuality === 'HD' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('HD')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                      >
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-hd-premium">HD</span>
+                          <span className="quality-res-saas-premium">Medium (720p)</span>
                         </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
+                        </div>
+                      </div>
 
+                      {/* SD Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-sd-premium ${activeQuality === 'SD' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('SD')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                      >
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-sd-premium">SD</span>
+                          <span className="quality-res-saas-premium">Standard (480p)</span>
+                        </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Actions Group */}
-                    <div className="success-actions">
-                      <div className="download-options-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="success-actions-premium" style={{ marginTop: '1.5rem' }}>
+                      <div className="download-options-group-premium" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
                           <button
                             className="btn-clay btn-clay-secondary"
@@ -1000,7 +1003,7 @@ const FacebookDownloader = ({ navigate }) => {
                         </button>
                       </div>
 
-                      <div className="btn-back-container" style={{ marginTop: '0.75rem' }}>
+                      <div className="btn-back-container" style={{ marginTop: '1rem' }}>
                         <button 
                           className="btn-back"
                           onClick={() => {

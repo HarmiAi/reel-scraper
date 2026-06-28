@@ -35,6 +35,8 @@ const InstagramDownloader = ({ navigate }) => {
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [errorDetails, setErrorDetails] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterQuality, setFilterQuality] = useState('ALL');
 
   const [stats, setStats] = useState({
     total: 0,
@@ -411,15 +413,45 @@ const InstagramDownloader = ({ navigate }) => {
       .catch(() => showToast('Failed to copy caption.', 'error'));
   };
 
+  const handleDeleteHistoryItem = (id, e) => {
+    if (e) e.stopPropagation();
+    const updated = history.filter((item) => item.id !== id);
+    saveHistory(updated);
+    showToast('Removed from history', 'info');
+  };
+
   const handleClearHistory = () => {
-    saveHistory([]);
-    showToast('Download logs cleared.', 'success');
+    if (window.confirm('Are you sure you want to clear your Instagram download history?')) {
+      saveHistory([]);
+      showToast('History cleared', 'info');
+    }
+  };
+
+  const handleLoadFromHistory = (item) => {
+    setReelData(item);
+    setUrl('');
+    setErrorDetails(null);
+    setDownloadSuccessData(null);
+    setIsPlayingPreview(false);
+    showToast(`Loaded details for @${item.username}`, 'info');
+    
+    const cardAnchor = document.getElementById('downloader-card-anchor');
+    if (cardAnchor) {
+      cardAnchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   const getFilteredHistory = () => {
-    return history.filter(item => {
-      const match = item.id && item.id.length > 0;
-      return match;
+    return history.filter((item) => {
+      const matchSearch = searchQuery.trim() === '' || 
+        (item.username && item.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.caption && item.caption.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      if (filterQuality === 'ALL') return matchSearch;
+      if (filterQuality === 'BEST') return matchSearch && item.quality === 'High';
+      if (filterQuality === 'HD') return matchSearch && item.quality === 'Medium';
+      if (filterQuality === 'SD') return matchSearch && item.quality === 'Low';
+      return matchSearch;
     });
   };
 
@@ -634,141 +666,161 @@ const InstagramDownloader = ({ navigate }) => {
                   className="success-card"
                   style={{ width: '100%' }}
                 >
-                  <div className="success-thumbnail-wrapper">
-                    {isPlayingPreview ? (
-                      <video
-                        src={reelData.videoUrl}
-                        className="success-thumbnail"
-                        controls
-                        autoPlay
-                        playsInline
-                        style={{ objectFit: 'contain', background: '#000' }}
-                      />
-                    ) : (
-                      <>
-                        <img 
-                          src={reelData.thumbnailUrl} 
-                          alt="" 
-                          className="success-thumbnail" 
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = FALLBACK_THUMBNAIL;
-                          }}
+                  {/* Left Column: Media Preview & Meta details */}
+                  <div className="success-preview-column">
+                    <div className="success-thumbnail-wrapper">
+                      {isPlayingPreview ? (
+                        <video
+                          src={reelData.videoUrl}
+                          className="success-thumbnail"
+                          controls
+                          autoPlay
+                          playsInline
+                          style={{ objectFit: 'contain', background: '#000' }}
                         />
-                        <button 
-                          className="thumbnail-play-overlay"
-                          onClick={() => setIsPlayingPreview(true)}
-                          aria-label="Play video preview"
-                        >
-                          <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <img 
+                            src={reelData.thumbnailUrl} 
+                            alt="" 
+                            className="success-thumbnail" 
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = FALLBACK_THUMBNAIL;
+                            }}
+                          />
+                          <button 
+                            className="thumbnail-play-overlay"
+                            onClick={() => setIsPlayingPreview(true)}
+                            aria-label="Play video preview"
+                          >
+                            <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
+                          </button>
+                        </>
+                      )}
+                      {reelData.duration && (
+                        <span className="thumbnail-duration">{reelData.duration}</span>
+                      )}
+                    </div>
 
-                  <div className="success-details">
-                    <div className="creator-profile">
-                      <div className="creator-avatar-clay">
+                    {/* Platform Badge */}
+                    <div className="media-platform-badge instagram-badge">
+                      <span className="badge-dot" style={{ background: 'var(--instagram-primary)' }}></span>
+                      Instagram Reel
+                    </div>
+
+                    {/* Creator Account Card */}
+                    <div className="creator-profile-mini">
+                      <div className="creator-avatar-clay-mini">
                         <img 
                           src={reelData.avatarUrl} 
                           alt="" 
-                          className="creator-avatar" 
+                          className="creator-avatar-mini" 
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                           }}
                         />
                       </div>
-                      <div className="creator-meta">
-                        <div className="creator-name-row">
-                          <span className="creator-username">@{reelData.username}</span>
-                          {reelData.verified && <CheckCircle size={14} className="verified-icon" />}
-                        </div>
-                        <span className="creator-followers">Creator Account</span>
+                      <div className="creator-meta-mini">
+                        <span className="creator-username-mini">@{reelData.username}</span>
+                        {reelData.verified && <CheckCircle size={12} className="verified-icon-mini" />}
                       </div>
                     </div>
 
-                    <p className="success-caption">{reelData.caption}</p>
+                    {/* Short Caption */}
+                    <p className="media-caption-mini" title={reelData.caption}>
+                      {reelData.caption ? (reelData.caption.length > 80 ? reelData.caption.substring(0, 77) + '...' : reelData.caption) : 'Enjoy this public Instagram reel.'}
+                    </p>
 
-                    <div className="reel-statistics-grid">
-                      <div className="stat-item-clay">
-                        <Heart size={14} className="stat-icon" />
-                        <div className="stat-info">
-                          <span className="stat-label">Likes</span>
-                          <span className="stat-value">{reelData.likes}</span>
-                        </div>
-                      </div>
-                      <div className="stat-item-clay">
-                        <MessageCircle size={14} className="stat-icon" />
-                        <div className="stat-info">
-                          <span className="stat-label">Comments</span>
-                          <span className="stat-value">{reelData.comments}</span>
-                        </div>
-                      </div>
+                    {/* Quality Count Tag */}
+                    <div className="quality-count-tag">
+                      <Sparkles size={12} style={{ color: 'var(--primary-color)' }} />
+                      <span>3 Download Formats Ready</span>
                     </div>
+                  </div>
 
-                    <div className="quality-selector-container">
-                      <h4 className="quality-title-saas">Select Download Quality</h4>
-                      <div className="quality-grid-saas">
-                        <div 
-                          className={`clay-card quality-card-saas card-best ${activeQuality === 'BEST' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('BEST')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-best">Best</span>
-                          <span className="quality-res-saas">Best Available Quality (1080p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
-                            <span>MP4 Format</span>
-                          </div>
-                        </div>
-
-                        <div 
-                          className={`clay-card quality-card-saas card-hd ${activeQuality === 'HD' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('HD')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-hd">HD</span>
-                          <span className="quality-res-saas">HD Quality (720p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
-                            <span>MP4 Format</span>
-                          </div>
-                        </div>
-
-                        <div 
-                          className={`clay-card quality-card-saas card-sd ${activeQuality === 'SD' ? 'active' : ''}`} 
-                          onClick={() => handleDownloadQuality('SD')}
-                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                        >
-                          <span className="quality-badge-saas badge-sd">SD</span>
-                          <span className="quality-res-saas">Standard Definition (480p)</span>
-                          <div className="quality-meta-info">
-                            <span className="quality-size-saas">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
-                            <span>MP4 Format</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.75rem', width: '100%', marginTop: '0.5rem' }}>
-                      <button 
-                        className="btn-clay btn-clay-secondary"
-                        style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', alignItems: 'center', padding: '0.65rem', flex: 1, fontSize: '0.85rem' }}
-                        onClick={() => handleCopyCaption(reelData.caption)}
+                  {/* Right Column: Download Actions & Quality selectors */}
+                  <div className="success-details-column">
+                    <h4 className="quality-title-saas-premium">Select Download Quality</h4>
+                    
+                    <div className="quality-grid-saas-premium">
+                      {/* Best Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-best-premium ${activeQuality === 'BEST' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('BEST')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
                       >
-                        <FileText size={16} /> Copy Caption
-                      </button>
-                      <button 
-                        className="btn-clay btn-clay-secondary"
-                        style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', alignItems: 'center', padding: '0.65rem', flex: 1, fontSize: '0.85rem' }}
-                        onClick={() => {
-                          setReelData(null);
-                          setUrl('');
-                        }}
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-best-premium">Best</span>
+                          <span className="quality-res-saas-premium">High (1080p)</span>
+                        </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
+                        </div>
+                      </div>
+
+                      {/* HD Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-hd-premium ${activeQuality === 'HD' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('HD')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
                       >
-                        <RefreshCw size={16} /> Reset Form
-                      </button>
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-hd-premium">HD</span>
+                          <span className="quality-res-saas-premium">Medium (720p)</span>
+                        </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
+                        </div>
+                      </div>
+
+                      {/* SD Quality Card */}
+                      <div 
+                        className={`clay-card quality-card-saas-premium card-sd-premium ${activeQuality === 'SD' ? 'active' : ''}`} 
+                        onClick={() => handleDownloadQuality('SD')}
+                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                      >
+                        <div className="quality-header-premium">
+                          <span className="quality-badge-saas-premium badge-sd-premium">SD</span>
+                          <span className="quality-res-saas-premium">Standard (480p)</span>
+                        </div>
+                        <div className="quality-meta-info-premium">
+                          <span className="quality-size-saas-premium">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
+                          <span className="quality-format-premium">MP4 Format</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions Group */}
+                    <div className="success-actions-premium" style={{ marginTop: '1.5rem' }}>
+                      <div className="download-options-group-premium" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+                          <button
+                            className="btn-clay btn-clay-secondary"
+                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                            onClick={() => handleCopyCaption(reelData.caption)}
+                          >
+                            <FileText size={16} /> Copy Caption
+                          </button>
+                          
+                          <button
+                            className="btn-clay btn-clay-secondary"
+                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                            onClick={() => {
+                              setReelData(null);
+                              setUrl('');
+                              setErrorDetails(null);
+                              setDownloadSuccessData(null);
+                              setActiveQuality('BEST');
+                            }}
+                          >
+                            <RefreshCw size={16} /> Reset Form
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -802,58 +854,131 @@ const InstagramDownloader = ({ navigate }) => {
       {/* Analytics Summary */}
       <AnalyticsCards stats={stats} />
 
-      {/* Download History Log */}
-      {filteredHistory.length > 0 && (
-        <section className="history-section-clay">
-          <div className="history-header">
-            <h3 className="history-title">Recent Downloads History</h3>
-            <button className="btn-clear-history" onClick={handleClearHistory}>
-              <Trash2 size={14} /> Clear Logs
+      {/* Recent Downloads Section */}
+      <section id="history-section-anchor" className="history-section">
+        <div className="history-header">
+          <h2 className="history-heading">Recent Instagram Downloads</h2>
+          {history.length > 0 && (
+            <button className="btn-clear-history" onClick={handleClearHistory} aria-label="Clear download history">
+              <Trash2 size={13} /> Clear All
             </button>
+          )}
+        </div>
+
+        {/* Search and Filters Bar */}
+        {history.length > 0 && (
+          <div className="history-filters-bar">
+            <div className="clay-input-wrapper history-search-wrapper" style={{ padding: '0.35rem' }}>
+              <input 
+                type="text" 
+                className="clay-input" 
+                style={{ fontSize: '0.85rem', padding: '0.4rem 0.5rem' }}
+                placeholder="Search history by creator/caption..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search download history"
+              />
+            </div>
+            
+            <div className="history-filter-chips">
+              {['ALL', 'BEST', 'HD', 'SD'].map((q) => (
+                <button
+                  key={q}
+                  className={`history-filter-chip ${filterQuality === q ? 'active' : ''}`}
+                  onClick={() => setFilterQuality(q)}
+                >
+                  {q === 'ALL' ? 'All' : q}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="history-list">
-            {filteredHistory.map((item, idx) => (
-              <div key={item.id + '_' + idx} className="history-item-clay spotlight-card" onMouseMove={handleCardMouseMove}>
-                <div className="spotlight-glow" />
-                <div className="history-item-meta" style={{ zIndex: 2 }}>
-                  <div className="history-avatar-wrapper">
+        )}
+
+        <div className="history-list">
+          <AnimatePresence initial={false}>
+            {filteredHistory.length > 0 ? (
+              filteredHistory.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="clay-card history-item-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleLoadFromHistory(item)}
+                >
+                  <div className="history-thumbnail-wrapper">
                     <img 
                       src={item.thumbnailUrl} 
                       alt="" 
-                      className="history-avatar-img"
+                      className="history-thumbnail" 
+                      loading="lazy" 
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = FALLBACK_THUMBNAIL;
                       }}
                     />
                   </div>
-                  <div className="history-item-details">
-                    <span className="history-creator">@{item.username || 'instagram.creator'}</span>
-                    <span className="history-caption">{item.caption || 'Public Reel'}</span>
-                    <span className="history-time">{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Quality: {item.quality || 'High'}</span>
+                  
+                  <div className="history-details">
+                    <div className="history-user-info" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
+                      <span className="history-username">@{item.username}</span>
+                      {item.quality && (
+                        <span className="history-quality-tag">{item.quality}</span>
+                      )}
+                      <span className="history-date" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                        {new Date(item.timestamp || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                    <p className="history-caption">{item.caption}</p>
                   </div>
-                </div>
-                <button
-                  className="btn-clay btn-clay-primary history-download-btn"
-                  onClick={() => {
-                    setUrl(item.url || '');
-                    setReelData(item);
-                    setTimeout(() => {
-                      const element = document.getElementById('downloader-card-anchor');
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }, 100);
-                  }}
-                  style={{ zIndex: 2 }}
-                >
-                  <Download size={14} /> Reload
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+
+                  <div className="history-actions" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="btn-history-action"
+                      title="View Details"
+                      onClick={() => handleLoadFromHistory(item)}
+                      aria-label={`Restore details for ${item.username}`}
+                    >
+                      <RefreshCw size={14} />
+                    </button>
+                    
+                    <button
+                      className="btn-history-action"
+                      title="Quick Download Again"
+                      onClick={() => {
+                        const qKey = (item.quality || '').includes('480') ? 'SD' : (item.quality || '').includes('720') ? 'HD' : 'BEST';
+                        handleDownloadMedia(item.videoUrl, `savetube_ig_${item.id}_${qKey.toLowerCase()}.mp4`, qKey);
+                      }}
+                      aria-label={`Quick Download again for ${item.username}`}
+                    >
+                      <Download size={14} />
+                    </button>
+
+                    <button
+                      className="btn-history-action"
+                      title="Remove from history"
+                      onClick={(e) => handleDeleteHistoryItem(item.id, e)}
+                      aria-label={`Delete ${item.username} from history`}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <motion.div
+                key="empty"
+                className="clay-card history-empty-card"
+              >
+                <Info size={28} className="history-empty-icon" />
+                <p className="history-empty-text">No downloads found in logs.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
 
       {/* Unlock Premium Modal */}
       <UnlockModal 

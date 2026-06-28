@@ -140,6 +140,7 @@
     -6px -6px 12px rgba(255, 255, 255, 1.0),
     inset 2px 2px 4px rgba(255, 255, 255, 0.6),
     inset -2px -2px 4px rgba(16, 36, 24, 0.12);
+    margin-bottom: 1rem;
 }
 
 .btn-clay-primary:hover {
@@ -793,6 +794,7 @@
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
+  margin-bottom: 1rem;
 }
 
 .history-search-wrapper {
@@ -1755,4 +1757,267 @@
     width: 100%;
     padding: 0.5rem;
   }
+}
+
+/* Premium Success Card Grid layout */
+.success-card {
+  display: grid !important;
+  grid-template-columns: 240px 1fr !important;
+  gap: 2rem !important;
+  align-items: start !important;
+  text-align: left !important;
+}
+
+.success-preview-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.media-platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-color);
+  box-shadow: var(--shadow-surface-sunken);
+  width: fit-content;
+  color: var(--text-secondary);
+}
+
+.creator-profile-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.creator-avatar-clay-mini {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  box-shadow: var(--shadow-card-raised);
+}
+
+.creator-avatar-mini {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.creator-meta-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.creator-username-mini {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.verified-icon-mini {
+  color: #0095f6;
+  fill: #fff;
+}
+
+.media-caption-mini {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.quality-count-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: rgba(165, 188, 161, 0.08);
+  width: fit-content;
+}
+
+.success-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.quality-title-saas-premium {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+  text-align: left;
+}
+
+.quality-grid-saas-premium {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.quality-card-saas-premium {
+  background: var(--card-bg) !important;
+  border: 1px solid rgba(165, 188, 161, 0.15) !important;
+  box-shadow: var(--shadow-card-raised) !important;
+  padding: 1rem 1.25rem !important;
+  display: flex;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.quality-card-saas-premium:hover {
+  transform: translateX(4px) scale(1.01);
+  box-shadow: 0 10px 20px rgba(165, 188, 161, 0.2), -4px -4px 10px rgba(255, 255, 255, 0.8) !important;
+}
+
+.quality-header-premium {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quality-badge-saas-premium {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  color: #fff;
+}
+
+.badge-best-premium {
+  background: #f59e0b;
+}
+
+.badge-hd-premium {
+  background: #10b981;
+}
+
+.badge-sd-premium {
+  background: #4d6152;
+}
+
+.quality-res-saas-premium {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.quality-meta-info-premium {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.quality-size-saas-premium {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Premium active quality card styles */
+.quality-card-saas-premium.active {
+  background: var(--surface-color) !important;
+  box-shadow: inset 3px 3px 6px rgba(165, 188, 161, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.8) !important;
+  transform: translateX(0) scale(0.99);
+}
+
+.quality-card-saas-premium.card-best-premium.active {
+  border: 1px solid #f59e0b !important;
+  background: rgba(245, 158, 11, 0.03) !important;
+}
+
+.quality-card-saas-premium.card-hd-premium.active {
+  border: 1px solid #10b981 !important;
+  background: rgba(16, 185, 129, 0.03) !important;
+}
+
+.quality-card-saas-premium.card-sd-premium.active {
+  border: 1px solid #4d6152 !important;
+  background: rgba(77, 97, 82, 0.03) !important;
+}
+
+/* Responsive adjustment */
+@media (max-width: 640px) {
+  .success-card {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Success Preview Card styling */
+.success-preview-card {
+  padding: 1.5rem !important;
+  margin: 1.5rem auto !important;
+  max-width: 520px !important;
+  box-sizing: border-box !important;
+}
+
+.success-preview-layout {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  gap: 1.25rem !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+.success-preview-thumb {
+  width: 100% !important;
+  aspect-ratio: 9 / 16 !important;
+  border-radius: var(--radius-sm) !important;
+  object-fit: cover !important;
+  box-shadow: var(--shadow-surface-sunken) !important;
+  background: var(--surface-color) !important;
+}
+
+.success-preview-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+
+.success-preview-user {
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  color: var(--text-primary) !important;
+}
+
+.success-preview-badge {
+  display: inline-block !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  background: var(--primary-color) !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: var(--radius-xs) !important;
+  width: fit-content !important;
+}
+
+.success-preview-caption {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
 }
