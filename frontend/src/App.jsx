@@ -9,6 +9,7 @@ import PrivacyPolicy from './components/PrivacyPolicy.jsx';
 import TermsOfService from './components/TermsOfService.jsx';
 import Footer from './components/Footer.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import NotFound from './components/NotFound.jsx';
 
 // Platforms Downloader Components
 import FacebookDownloader from './platforms/facebook/FacebookDownloader.jsx';
@@ -79,11 +80,11 @@ const App = () => {
               <Contact key="contact" navigate={navigate} />
             )}
 
-            {currentPath === '/privacy' && (
+            {(currentPath === '/privacy' || currentPath === '/privacy-policy') && (
               <PrivacyPolicy key="privacy" navigate={navigate} />
             )}
 
-            {currentPath === '/terms' && (
+            {(currentPath === '/terms' || currentPath === '/terms-of-service') && (
               <TermsOfService key="terms" navigate={navigate} />
             )}
 
@@ -105,8 +106,10 @@ const App = () => {
              currentPath !== '/about' && 
              currentPath !== '/contact' && 
              currentPath !== '/privacy' && 
-             currentPath !== '/terms' && (
-              <Dashboard key="404-fallback" navigate={navigate} />
+             currentPath !== '/privacy-policy' && 
+             currentPath !== '/terms' && 
+             currentPath !== '/terms-of-service' && (
+              <NotFound key="404-page" navigate={navigate} />
             )}
           </AnimatePresence>
         </main>

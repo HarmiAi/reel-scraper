@@ -121,88 +121,33 @@ export const downloadProxy = async (req, res, next) => {
       return res.status(400).send(typeError);
     }
 
-    if (qualityKey === 'high') {
-      console.log('[Instagram DownloadProxy] Streaming original High CDN URL directly.');
-      
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Type', contentType || 'video/mp4');
-      if (contentLength && parseInt(contentLength, 10) > 0) {
-        res.setHeader('Content-Length', contentLength);
-      }
-
-      console.log(`[Instagram DownloadProxy Stream] Initializing byte transfer to client. Filename: ${filename}`);
-
-      let bytesTransferred = 0;
-      const nodeStream = Readable.fromWeb(mediaResponse.body);
-
-      nodeStream.on('data', (chunk) => {
-        bytesTransferred += chunk.length;
-      });
-
-      nodeStream.on('end', () => {
-        console.log(`[Instagram DownloadProxy Stream Finished] Successfully transferred ${bytesTransferred} bytes for ${filename}`);
-      });
-
-      nodeStream.on('error', (err) => {
-        console.error(`[Instagram DownloadProxy Stream Error] Socket error during transfer of ${filename}:`, err.message);
-      });
-
-      return nodeStream.pipe(res);
-    }
-
-    console.log(`[Instagram DownloadProxy] Falling back to on-the-fly transcoding for ${targetQuality}...`);
+    // Stream original CDN URL directly for all quality requests since only one stream is returned by the extraction service
+    console.log(`[Instagram DownloadProxy] Streaming original CDN URL directly for quality ${targetQuality}.`);
     
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Type', 'video/mp4');
-
-    let command = ffmpeg(url)
-      // Inject browser User-Agent to prevent FFmpeg request from being blocked with a 403
-      .inputOptions([
-        '-user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"'
-      ])
-      .format('mp4')
-      .outputOptions([
-        '-movflags frag_keyframe+empty_moov',
-        '-preset ultrafast',
-        '-vsync 0'
-      ])
-      .on('error', (err) => {
-        console.error('[Instagram FFmpeg Error] Transcoding failed:', err.message);
-        if (!res.headersSent) {
-          res.status(500).send('Transcoding failed');
-        }
-      });
-
-    if (qualityKey === 'medium') {
-      command = command
-        .videoCodec('libx264')
-        .audioCodec('aac')
-        .outputOptions([
-          '-vf scale=-2:\'min(720,ih)\'',
-          '-crf 26'
-        ]);
-    } else if (qualityKey === 'low') {
-      command = command
-        .videoCodec('libx264')
-        .audioCodec('aac')
-        .outputOptions([
-          '-vf scale=-2:\'min(480,ih)\'',
-          '-crf 32'
-        ]);
+    res.setHeader('Content-Type', contentType || 'video/mp4');
+    if (contentLength && parseInt(contentLength, 10) > 0) {
+      res.setHeader('Content-Length', contentLength);
     }
 
-    const monitor = new PassThrough();
+    console.log(`[Instagram DownloadProxy Stream] Initializing byte transfer to client. Filename: ${filename}`);
+
     let bytesTransferred = 0;
-    
-    monitor.on('data', (chunk) => {
+    const nodeStream = Readable.fromWeb(mediaResponse.body);
+
+    nodeStream.on('data', (chunk) => {
       bytesTransferred += chunk.length;
     });
 
-    monitor.on('end', () => {
-      console.log(`[Instagram Transcode Stream Finished] Successfully transferred ${bytesTransferred} bytes for ${filename}`);
+    nodeStream.on('end', () => {
+      console.log(`[Instagram DownloadProxy Stream Finished] Successfully transferred ${bytesTransferred} bytes for ${filename}`);
     });
 
-    command.pipe(monitor).pipe(res);
+    nodeStream.on('error', (err) => {
+      console.error(`[Instagram DownloadProxy Stream Error] Socket error during transfer of ${filename}:`, err.message);
+    });
+
+    return nodeStream.pipe(res);
 
   } catch (err) {
     console.error('[Instagram DownloadProxy Failed]', err);

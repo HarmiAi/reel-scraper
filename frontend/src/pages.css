@@ -737,3 +737,72 @@
   box-shadow: var(--shadow-hover);
 }
 
+/* ==========================================================================
+   Custom 404 page Styling
+   ========================================================================== */
+.not-found-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.not-found-code {
+  font-size: clamp(4.5rem, 12vw, 7.5rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  letter-spacing: var(--tracking-tight);
+}
+
+.not-found-icon-container {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-full);
+  background: var(--surface-color);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-surface-raised);
+  border: 1px solid rgba(97, 208, 122, 0.2);
+}
+
+.not-found-layout h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.not-found-layout p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 440px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.not-found-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 340px;
+  justify-content: center;
+}
+
+.not-found-actions .btn-clay {
+  flex: 1;
+  height: 48px;
+}
+
+@media (max-width: 480px) {
+  .not-found-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+
