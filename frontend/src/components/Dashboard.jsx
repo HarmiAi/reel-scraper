@@ -55,6 +55,7 @@ const Dashboard = ({ navigate }) => {
     window.addEventListener('mousemove', handleMascotTilt);
     return () => window.removeEventListener('mousemove', handleMascotTilt);
   }, []);
+
   return (
     <motion.div
       key="dashboard-view"

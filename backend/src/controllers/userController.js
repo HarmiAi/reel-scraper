@@ -9,7 +9,12 @@ export const createUser = async (req, res, next) => {
   const { username, email } = req.body;
 
   try {
-    const user = await User.create({ username, email });
+    const user = {
+      _id: "66ea43b7778c43debefa3224",
+      username: username || "guest_user",
+      email: email || "guest@savetube.app",
+      createdAt: new Date()
+    };
     return res.status(201).json({
       success: true,
       data: user
@@ -28,12 +33,12 @@ export const getUserById = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const user = await User.findById(id);
-    if (!user) {
-      const err = new Error('User not found');
-      err.statusCode = 404;
-      throw err;
-    }
+    const user = {
+      _id: id,
+      username: "guest_user",
+      email: "guest@savetube.app",
+      createdAt: new Date()
+    };
     return res.status(200).json({
       success: true,
       data: user

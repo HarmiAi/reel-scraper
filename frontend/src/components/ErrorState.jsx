@@ -41,6 +41,13 @@ const ErrorState = ({ errorType, customMessage, onReset, platform = 'instagram' 
             : 'The requested Instagram post could not be located. It may have been deleted by the owner, or there might be a typo in the URL path.',
           actionLabel: 'Verify URL and Try Again'
         };
+      case 'extraction_failed':
+        return {
+          icon: <AlertCircle size={32} className="error-state-icon" />,
+          title: 'Extraction Failed',
+          description: customMessage || 'Unable to extract the video stream. Please confirm the link is public, accessible, and try again.',
+          actionLabel: 'Try Again'
+        };
       case 'invalid_url':
       default:
         return {

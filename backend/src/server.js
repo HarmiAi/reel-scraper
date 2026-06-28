@@ -8,7 +8,7 @@ import userRoutes from './routes/userRoutes.js';
 import historyRoutes from './routes/historyRoutes.js';
 import facebookRoutes from './routes/facebookRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
-import { startCleanupJob } from './controllers/reelController.js';
+import { startCleanupJob } from './controllers/instagramController.js';
 
 // Load environmental keys
 dotenv.config();
@@ -57,8 +57,8 @@ app.use(errorHandler);
 // Bootstrap Server & Connect DB
 const startServer = async () => {
   try {
-    // Attempt Mongoose Connection to MongoDB Atlas
-    await connectDB();
+    // Database connection bypassed for stateless mode
+    console.log('ℹ️ Running in Stateless Mode (No MongoDB connection)');
 
     app.listen(PORT, () => {
       console.log(`=========================================`);
@@ -71,6 +71,8 @@ const startServer = async () => {
 
     // Start background temp files cleanup job
     startCleanupJob();
+
+    // Browser pre-launch omitted (using lightweight HTTP fetch instead)
   } catch (err) {
     console.error(`💥 Failed to bootstrap backend server: ${err.message}`);
     process.exit(1);

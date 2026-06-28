@@ -11,8 +11,8 @@ import Footer from './components/Footer.jsx';
 import Dashboard from './components/Dashboard.jsx';
 
 // Platforms Downloader Components
-import InstagramDownloader from './platforms/instagram/InstagramDownloader.jsx';
 import FacebookDownloader from './platforms/facebook/FacebookDownloader.jsx';
+import InstagramDownloader from './platforms/instagram/InstagramDownloader.jsx';
 
 const App = () => {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -91,12 +91,12 @@ const App = () => {
               <Dashboard key="dashboard" navigate={navigate} />
             )}
 
-            {currentPath === '/instagram' && (
-              <InstagramDownloader key="instagram" navigate={navigate} />
-            )}
-
             {currentPath === '/facebook' && (
               <FacebookDownloader key="facebook" navigate={navigate} />
+            )}
+
+            {currentPath === '/instagram' && (
+              <InstagramDownloader key="instagram" navigate={navigate} />
             )}
 
             {currentPath !== '/' && 
@@ -106,7 +106,7 @@ const App = () => {
              currentPath !== '/contact' && 
              currentPath !== '/privacy' && 
              currentPath !== '/terms' && (
-              <Dashboard key="404-dashboard" navigate={navigate} />
+              <Dashboard key="404-fallback" navigate={navigate} />
             )}
           </AnimatePresence>
         </main>

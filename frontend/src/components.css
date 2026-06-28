@@ -634,63 +634,117 @@
 .quality-grid-saas {
   display: flex;
   background: var(--surface-color);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-  gap: 4px;
+  border-radius: var(--radius-lg);
+  padding: 8px;
+  gap: 8px;
   width: 100%;
+  box-sizing: border-box;
   box-shadow: var(--shadow-surface-sunken);
+  border: 1px solid rgba(165, 188, 161, 0.15);
 }
 
 .quality-card-saas {
   flex: 1;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0.65rem 0.5rem;
+  background: var(--card-bg) !important;
+  border: 1px solid rgba(165, 188, 161, 0.2) !important;
+  box-shadow: var(--shadow-card-raised) !important;
+  padding: 1rem 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.15rem;
+  gap: 0.35rem;
   cursor: pointer;
-  border-radius: 8px;
-  transition: var(--transition-smooth);
+  border-radius: var(--radius-md);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
 }
 
+/* Hover State - Premium elevate effect */
 .quality-card-saas:hover {
   background: var(--card-bg) !important;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card-raised) !important;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(165, 188, 161, 0.25), -4px -4px 10px rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Visually distinct option decorators */
+.quality-card-saas.card-best {
+  border-left: 3px solid #f59e0b !important;
+}
+.quality-card-saas.card-hd {
+  border-left: 3px solid #10b981 !important;
+}
+.quality-card-saas.card-sd {
+  border-left: 3px solid #4d6152 !important;
+}
+
+/* Selected/Active states using neumorphic inset sunken effect */
+.quality-card-saas.active {
+  background: var(--surface-color) !important;
+  box-shadow: inset 3px 3px 6px rgba(165, 188, 161, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.9) !important;
+  transform: translateY(0) scale(0.98);
+}
+
+.quality-card-saas.card-best.active {
+  border: 2px solid #f59e0b !important;
+  background: rgba(245, 158, 11, 0.05) !important;
+}
+
+.quality-card-saas.card-hd.active {
+  border: 2px solid #10b981 !important;
+  background: rgba(16, 185, 129, 0.05) !important;
+}
+
+.quality-card-saas.card-sd.active {
+  border: 2px solid #4d6152 !important;
+  background: rgba(77, 97, 82, 0.05) !important;
 }
 
 .quality-badge-saas {
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  background: transparent !important;
-  border: none !important;
-  padding: 0;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: var(--tracking-wider);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-xs);
+  transition: var(--transition-smooth);
+}
+
+.badge-best {
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+.badge-hd {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+.badge-sd {
+  color: #4b5563;
+  background: rgba(77, 97, 82, 0.12) !important;
 }
 
 .quality-res-saas {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary);
+  text-align: center;
 }
 
 .quality-meta-info {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: 0.7rem;
   color: var(--text-secondary);
-  gap: 0.25rem;
+  gap: 0.1rem;
 }
 
 .quality-size-saas {
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--primary-hover);
 }
 
 /* ==========================================================================

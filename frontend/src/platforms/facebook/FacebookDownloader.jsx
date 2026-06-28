@@ -39,6 +39,7 @@ const FacebookDownloader = ({ navigate }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterQuality, setFilterQuality] = useState('ALL');
+  const [activeQuality, setActiveQuality] = useState('BEST');
 
   const mascotRef = useRef(null);
 
@@ -185,6 +186,15 @@ const FacebookDownloader = ({ navigate }) => {
       return;
     }
 
+    if (cleanedUrl.toLowerCase().includes('instagram.com')) {
+      setErrorDetails({
+        type: 'invalid_url',
+        message: 'This application currently supports Facebook Reel downloads only.'
+      });
+      showToast('Instagram links are not supported', 'error');
+      return;
+    }
+
     if (!validateFacebookUrl(cleanedUrl)) {
       setErrorDetails({
         type: 'invalid_url',
@@ -195,33 +205,42 @@ const FacebookDownloader = ({ navigate }) => {
     }
 
     setIsLoading(true);
-    setProgressPercent(0);
+    setProgressPercent(15);
     setProgressStep('Validating URL...');
     setReelData(null);
     setErrorDetails(null);
     setDownloadSuccessData(null);
     setIsPlayingPreview(false);
 
-    let simulatedProgress = 0;
-    const steps = [
-      { t: 'Validating URL...', min: 15 },
-      { t: 'Analyzing Video...', min: 40 },
-      { t: 'Fetching Metadata...', min: 70 },
-      { t: 'Preparing Download...', min: 90 }
-    ];
+    const timer1 = setTimeout(() => {
+      setProgressPercent(45);
+      setProgressStep('Analyzing Video...');
+    }, 150);
+
+    const timer2 = setTimeout(() => {
+      setProgressPercent(75);
+      setProgressStep('Fetching Metadata...');
+    }, 350);
+
+    const timer3 = setTimeout(() => {
+      setProgressPercent(90);
+      setProgressStep('Preparing Download...');
+    }, 600);
 
     const progressInterval = setInterval(() => {
-      simulatedProgress += 1;
-      if (simulatedProgress <= 92) {
-        setProgressPercent(simulatedProgress);
-        const currentStep = steps.find(s => simulatedProgress <= s.min) || steps[steps.length - 1];
-        setProgressStep(currentStep.t);
-      }
-    }, 90);
+      setProgressPercent((prev) => {
+        if (prev < 98) return prev + 1;
+        return prev;
+      });
+    }, 300);
 
     try {
       const data = await fetchFacebookData(cleanedUrl);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       clearInterval(progressInterval);
+
       setProgressPercent(100);
       setProgressStep('Complete!');
       
@@ -256,6 +275,9 @@ const FacebookDownloader = ({ navigate }) => {
       }, 500);
 
     } catch (err) {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       clearInterval(progressInterval);
       setIsLoading(false);
       const errorMsg = err.message || 'Scraping failed. Confirm the Facebook post is public.';
@@ -266,6 +288,103 @@ const FacebookDownloader = ({ navigate }) => {
         message: errorMsg
       });
       
+      showToast(errorMsg, 'error');
+    }
+  };
+
+  const handleDirectQualitySubmit = async (qualityKey) => {
+    const cleanedUrl = url.trim();
+    if (!cleanedUrl) {
+      showToast('Please enter a Facebook Video URL', 'error');
+      return;
+    }
+
+    if (!validateFacebookUrl(cleanedUrl)) {
+      setErrorDetails({
+        type: 'invalid_url',
+        message: 'Invalid Facebook URL format. The Save Tube supports public Facebook reels and video links.'
+      });
+      showToast('Invalid URL path structure', 'error');
+      return;
+    }
+
+    if (reelData && reelData.url === cleanedUrl) {
+      handleDownloadQuality(qualityKey);
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorDetails(null);
+    setDownloadSuccessData(null);
+    setIsPlayingPreview(false);
+
+    try {
+      const data = await fetchFacebookData(cleanedUrl);
+      setReelData(data);
+
+      const qualityLabel = qualityKey === 'BEST' ? 'High' : qualityKey === 'HD' ? 'Medium' : 'Low';
+      const filename = `savetube_${data.id || 'video'}_${qualityKey.toLowerCase()}.mp4`;
+
+      // Trigger actual download proxy stream
+      await downloadFacebookFile(data.videoUrl, filename, qualityKey, data.id);
+
+      // Record download stats
+      const counts = {};
+      let maxCount = 0;
+      let mostDownloaded = stats.mostDownloadedCreator || 'None';
+
+      const itemInHistory = {
+        id: data.id,
+        username: data.username,
+        avatarUrl: data.avatarUrl,
+        caption: data.caption,
+        thumbnailUrl: data.thumbnailUrl,
+        videoUrl: data.videoUrl,
+        timestamp: Date.now(),
+        quality: qualityLabel
+      };
+
+      const existingIndex = history.findIndex((item) => item.id === data.id);
+      let updatedHistory = [...history];
+      if (existingIndex !== -1) {
+        updatedHistory.splice(existingIndex, 1);
+      }
+      updatedHistory = [itemInHistory, ...updatedHistory].slice(0, 20);
+      saveHistory(updatedHistory);
+
+      updatedHistory.forEach(item => {
+        if (item.username) {
+          counts[item.username] = (counts[item.username] || 0) + 1;
+        }
+      });
+
+      Object.keys(counts).forEach(username => {
+        if (counts[username] > maxCount) {
+          maxCount = counts[username];
+          mostDownloaded = `@${username}`;
+        }
+      });
+
+      const updatedStats = {
+        total: stats.total + 1,
+        hd: (qualityKey === 'HD' || qualityKey === 'BEST') ? stats.hd + 1 : stats.hd,
+        sd: qualityKey === 'SD' ? stats.sd + 1 : stats.sd,
+        mostDownloadedCreator: mostDownloaded
+      };
+      saveStats(updatedStats);
+
+      setDownloadSuccessData({ reelData: data, qualityName: qualityLabel });
+      setIsLoading(false);
+      showToast('Download started successfully!', 'success');
+
+    } catch (err) {
+      setIsLoading(false);
+      const errorMsg = err.message || 'Scraping failed. Confirm the Facebook post is public.';
+      const errorType = parseErrorType(errorMsg);
+      setErrorDetails({
+        type: errorType,
+        message: errorMsg
+      });
       showToast(errorMsg, 'error');
     }
   };
@@ -284,6 +403,7 @@ const FacebookDownloader = ({ navigate }) => {
 
   const handleDownloadQuality = (qualityKey) => {
     if (isDownloading) return;
+    setActiveQuality(qualityKey);
     const qualityLabel = qualityKey === 'BEST' ? 'High' : qualityKey === 'HD' ? 'Medium' : 'Low';
     
     if (qualityKey === 'SD') {
@@ -530,13 +650,6 @@ const FacebookDownloader = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
-      {/* Back button to Hub Dashboard */}
-      <div style={{ width: '100%', maxWidth: '640px', display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
-        <button className="btn-back" onClick={() => navigate('/')} style={{ fontSize: '0.85rem' }}>
-          <ArrowLeft size={14} /> Back to Hub selection
-        </button>
-      </div>
-
       {/* Hero Section */}
       <section className="hero-section" style={{ marginBottom: '0.75rem' }}>
         <div className="hero-badge" style={{ marginBottom: '0.4rem' }}>
@@ -572,359 +685,368 @@ const FacebookDownloader = ({ navigate }) => {
           onMouseMove={handleCardMouseMove}
         >
           <div className="spotlight-glow" />
-          
-          <AnimatePresence mode="wait">
-            
-            {/* A. ERROR STATE */}
-            {!isLoading && errorDetails && (
-              <motion.div
-                key="error-state-card"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                style={{ zIndex: 2 }}
-              >
-                <ErrorState 
-                  errorType={errorDetails.type}
-                  customMessage={errorDetails.message}
-                  platform="facebook"
-                  onReset={() => {
-                    setErrorDetails(null);
-                    setUrl('');
-                  }}
-                />
-              </motion.div>
-            )}
 
-            {/* B. SUCCESS DOWNLOAD STATE */}
-            {!isLoading && downloadSuccessData && (
-              <motion.div
-                key="download-success-view"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                style={{ zIndex: 2 }}
-              >
-                <DownloadSuccessScreen 
-                  reelData={downloadSuccessData.reelData}
-                  qualityName={downloadSuccessData.qualityName}
-                  onReset={() => {
-                    setDownloadSuccessData(null);
-                    setReelData(null);
-                    setUrl('');
-                  }}
-                  onViewHistory={() => {
-                    const el = document.getElementById('history-section-anchor');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  onShareApp={handleShareApp}
-                />
-              </motion.div>
-            )}
+          {/* Form and Input Section (Always Visible) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 2, width: '100%' }}>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <h3 style={{ fontWeight: 700, fontSize: '1.25rem' }}>Paste Facebook URL</h3>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                Enter a valid public Facebook reel or video link to pull the stream container.
+              </p>
+            </div>
 
-            {/* C. INPUT STATE */}
-            {!isLoading && !reelData && !errorDetails && !downloadSuccessData && (
-              <motion.div
-                key="input-state"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 2 }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <h3 style={{ fontWeight: 700, fontSize: '1.25rem' }}>Paste Facebook URL</h3>
-                  <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                    Enter a valid public Facebook reel or video link to pull the stream container.
-                  </p>
-                </div>
-
-                <form onSubmit={handleDownloadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div className="clay-input-wrapper">
-                    <span className="input-icon-left">
-                      <DownloadCloud size={20} />
-                    </span>
-                    
-                    <label htmlFor="facebook-url-input" style={{ display: 'none' }}>
-                      Facebook Video URL
-                    </label>
-                    <input
-                      type="text"
-                      id="facebook-url-input"
-                      className="clay-input"
-                      placeholder="https://www.facebook.com/reel/..."
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      aria-label="Facebook Video URL"
-                    />
-
-                    {url && (
-                      <button
-                        type="button"
-                        className="btn-clay btn-clay-paste"
-                        style={{ padding: '0.5rem', background: 'transparent', boxShadow: 'none', border: 'none', color: 'var(--text-tertiary)' }}
-                        onClick={() => setUrl('')}
-                        aria-label="Clear Input"
-                      >
-                        <X size={16} />
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      className="btn-clay btn-clay-paste"
-                      onClick={handlePaste}
-                      aria-label="Paste from clipboard"
-                    >
-                      <Clipboard size={14} /> Paste
-                    </button>
-                  </div>
-
-                  <motion.button
-                    type="submit"
-                    className="btn-clay btn-clay-primary"
-                    disabled={isLoading}
-                    whileHover={isLoading ? {} : { y: -2 }}
-                    whileTap={isLoading ? {} : { y: 1 }}
-                    style={isLoading ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
-                  >
-                    <DownloadCloud size={18} /> Extract Media
-                  </motion.button>
-                </form>
-
-                {/* Quick Demos Panel */}
-                <div className="demo-reels-container">
-                  <span className="demo-title">Try Public Facebook Presets</span>
-                  <div className="demo-chips">
-                    <button
-                      className="demo-chip"
-                      onClick={() => handleSelectDemo('https://www.facebook.com/reel/123456789012345')}
-                    >
-                      Public Reel 🎬
-                    </button>
-                    <button
-                      className="demo-chip"
-                      onClick={() => handleSelectDemo('https://www.facebook.com/watch/?v=123456789012345')}
-                    >
-                      Watch Video 📺
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* D. LOADING STATE */}
-            {isLoading && !errorDetails && !downloadSuccessData && (
-              <motion.div
-                key="loading-state"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="loader-wrapper"
-                style={{ zIndex: 2, width: '100%' }}
-              >
-                <div className="clay-loader-sphere" />
-                <div className="loader-shadow" />
+            <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="clay-input-wrapper">
+                <span className="input-icon-left">
+                  <DownloadCloud size={20} />
+                </span>
                 
-                <div className="loader-status-container">
-                  <span className="loader-percent">{progressPercent}%</span>
-                  <span className="loader-step">{progressStep}</span>
-                </div>
+                <label htmlFor="facebook-url-input" style={{ display: 'none' }}>
+                  Facebook Video URL
+                </label>
+                <input
+                  type="text"
+                  id="facebook-url-input"
+                  className="clay-input"
+                  placeholder="https://www.facebook.com/reel/..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  disabled={isLoading}
+                  aria-label="Facebook Video URL"
+                />
 
-                <div className="loader-progress-bar-bg">
-                  <div 
-                    className="loader-progress-bar-fill"
-                    style={{ width: `${progressPercent}%` }}
+                {url && !isLoading && (
+                  <button
+                    type="button"
+                    className="btn-clay btn-clay-paste"
+                    style={{ padding: '0.5rem', background: 'transparent', boxShadow: 'none', border: 'none', color: 'var(--text-tertiary)' }}
+                    onClick={() => setUrl('')}
+                    aria-label="Clear Input"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="btn-clay btn-clay-paste"
+                  onClick={handlePaste}
+                  disabled={isLoading}
+                  aria-label="Paste from clipboard"
+                >
+                  <Clipboard size={14} /> Paste
+                </button>
+              </div>
+
+              {/* Direct Quality Download Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', width: '100%' }}>
+                <button
+                  type="button"
+                  className="btn-clay btn-clay-primary"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.75rem 0.5rem', fontSize: '0.85rem' }}
+                  disabled={isLoading}
+                  onClick={() => handleDirectQualitySubmit('SD')}
+                >
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>SD</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Standard (480p)</span>
+                </button>
+                
+                <button
+                  type="button"
+                  className="btn-clay btn-clay-primary"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.75rem 0.5rem', fontSize: '0.85rem' }}
+                  disabled={isLoading}
+                  onClick={() => handleDirectQualitySubmit('HD')}
+                >
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>HD</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Medium (720p)</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-clay btn-clay-primary"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.75rem 0.5rem', fontSize: '0.85rem' }}
+                  disabled={isLoading}
+                  onClick={() => handleDirectQualitySubmit('BEST')}
+                >
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Best</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>High (1080p)</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Quick Demos Panel */}
+            {!isLoading && !reelData && !errorDetails && !downloadSuccessData && (
+              <div className="demo-reels-container" style={{ marginTop: '-0.5rem' }}>
+                <span className="demo-title">Try Public Facebook Presets</span>
+                <div className="demo-chips">
+                  <button
+                    className="demo-chip"
+                    onClick={() => handleSelectDemo('https://www.facebook.com/reel/123456789012345')}
+                  >
+                    Public Reel 🎬
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dynamic Content Section */}
+          <div style={{ width: '100%', marginTop: (isLoading || reelData || errorDetails || downloadSuccessData) ? '1.5rem' : 0, zIndex: 2 }}>
+            <AnimatePresence mode="wait">
+              
+              {/* A. LOADING STATE */}
+              {isLoading && !errorDetails && !downloadSuccessData && (
+                <motion.div
+                  key="loading-state"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="loader-wrapper"
+                  style={{ width: '100%', padding: '1rem 0' }}
+                >
+                  <div className="clay-loader-sphere" />
+                  <div className="loader-status-container">
+                    <span className="loader-step" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Preparing your download...
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* B. ERROR STATE */}
+              {!isLoading && errorDetails && (
+                <motion.div
+                  key="error-state-card"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{ width: '100%' }}
+                >
+                  <ErrorState 
+                    errorType={errorDetails.type}
+                    customMessage={errorDetails.message}
+                    platform="facebook"
+                    onReset={() => {
+                      setErrorDetails(null);
+                      setUrl('');
+                    }}
                   />
-                </div>
-                <SkeletonLoader />
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-            {/* E. SUCCESS ANALYSIS VIEW */}
-            {!isLoading && reelData && !errorDetails && !downloadSuccessData && (
-              <motion.div
-                key="success-state"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="success-card"
-                style={{ zIndex: 2 }}
-              >
-                {/* Media Thumbnail Column */}
-                <div className="success-thumbnail-wrapper">
-                  {isPlayingPreview ? (
-                    <video
-                      src={reelData.videoUrl}
-                      className="success-thumbnail"
-                      controls
-                      autoPlay
-                      playsInline
-                      style={{ objectFit: 'contain', background: '#000' }}
-                    />
-                  ) : (
-                    <>
-                      <img 
-                        src={reelData.thumbnailUrl} 
-                        alt="" 
-                        className="success-thumbnail" 
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = FALLBACK_THUMBNAIL;
-                        }}
+              {/* C. SUCCESS ANALYSIS VIEW */}
+              {!isLoading && reelData && !errorDetails && !downloadSuccessData && (
+                <motion.div
+                  key="success-state"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+                  className="success-card"
+                  style={{ width: '100%' }}
+                >
+                  {/* Media Thumbnail Column */}
+                  <div className="success-thumbnail-wrapper">
+                    {isPlayingPreview ? (
+                      <video
+                        src={reelData.videoUrl}
+                        className="success-thumbnail"
+                        controls
+                        autoPlay
+                        playsInline
+                        style={{ objectFit: 'contain', background: '#000' }}
                       />
-                      <button 
-                        className="thumbnail-play-overlay"
-                        onClick={() => setIsPlayingPreview(true)}
-                        aria-label="Play video preview"
-                      >
-                        <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Info and Quality selections */}
-                <div className="success-details">
-                  <div className="creator-profile">
-                    <div className="creator-avatar-clay">
-                      <img 
-                        src={reelData.avatarUrl} 
-                        alt="" 
-                        className="creator-avatar" 
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                        }}
-                      />
-                    </div>
-                    <div className="creator-meta">
-                      <div className="creator-name-row">
-                        <span className="creator-username">@{reelData.username}</span>
-                        {reelData.verified && <CheckCircle size={14} className="verified-icon" />}
-                      </div>
-                      <span className="creator-followers">Creator Account</span>
-                    </div>
-                  </div>
-
-                  <p className="success-caption">{reelData.caption || 'Enjoy this public Facebook video.'}</p>
-
-                  <div className="reel-statistics-grid">
-                    <div className="stat-item-clay">
-                      <Heart size={14} className="stat-icon" />
-                      <div className="stat-info">
-                        <span className="stat-label">Likes</span>
-                        <span className="stat-value">{reelData.likes || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="stat-item-clay">
-                      <MessageCircle size={14} className="stat-icon" />
-                      <div className="stat-info">
-                        <span className="stat-label">Comments</span>
-                        <span className="stat-value">{reelData.comments || 'N/A'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quality Selector */}
-                  <div className="quality-selector-container">
-                    <h4 className="quality-title-saas">Select Download Quality</h4>
-                    <div className="quality-grid-saas">
-                      
-                      {/* Best Quality Card */}
-                      <div 
-                        className="clay-card quality-card-saas" 
-                        onClick={() => handleDownloadQuality('BEST')}
-                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                      >
-                        <span className="quality-badge-saas badge-best">Best</span>
-                        <span className="quality-res-saas">Best Available Quality (1080p)</span>
-                        <div className="quality-meta-info">
-                          <span className="quality-size-saas">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
-                          <span>MP4 Format</span>
-                        </div>
-                      </div>
-
-                      {/* HD Quality Card */}
-                      <div 
-                        className="clay-card quality-card-saas" 
-                        onClick={() => handleDownloadQuality('HD')}
-                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                      >
-                        <span className="quality-badge-saas badge-hd">HD</span>
-                        <span className="quality-res-saas">HD Quality (720p)</span>
-                        <div className="quality-meta-info">
-                          <span className="quality-size-saas">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
-                          <span>MP4 Format</span>
-                        </div>
-                      </div>
-
-                      {/* SD Quality Card */}
-                      <div 
-                        className="clay-card quality-card-saas" 
-                        onClick={() => handleDownloadQuality('SD')}
-                        style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
-                      >
-                        <span className="quality-badge-saas badge-sd">SD</span>
-                        <span className="quality-res-saas">SD Quality (480p)</span>
-                        <div className="quality-meta-info">
-                          <span className="quality-size-saas">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
-                          <span>MP4 Format</span>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Actions Group */}
-                  <div className="success-actions">
-                    <div className="download-options-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
-                        <button
-                          className="btn-clay btn-clay-secondary"
-                          style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
-                          onClick={() => handleCopyCaption(reelData.caption)}
+                    ) : (
+                      <>
+                        <img 
+                          src={reelData.thumbnailUrl} 
+                          alt="" 
+                          className="success-thumbnail" 
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = FALLBACK_THUMBNAIL;
+                          }}
+                        />
+                        <button 
+                          className="thumbnail-play-overlay"
+                          onClick={() => setIsPlayingPreview(true)}
+                          aria-label="Play video preview"
                         >
-                          <FileText size={16} /> Copy Caption
+                          <Play size={20} style={{ fill: 'var(--primary-color)', marginLeft: '3px' }} />
                         </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Info and Quality selections */}
+                  <div className="success-details">
+                    <div className="creator-profile">
+                      <div className="creator-avatar-clay">
+                        <img 
+                          src={reelData.avatarUrl} 
+                          alt="" 
+                          className="creator-avatar" 
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                          }}
+                        />
+                      </div>
+                      <div className="creator-meta">
+                        <div className="creator-name-row">
+                          <span className="creator-username">@{reelData.username}</span>
+                          {reelData.verified && <CheckCircle size={14} className="verified-icon" />}
+                        </div>
+                        <span className="creator-followers">Creator Account</span>
+                      </div>
+                    </div>
+
+                    <p className="success-caption">{reelData.caption || 'Enjoy this public Facebook video.'}</p>
+
+                    <div className="reel-statistics-grid">
+                      <div className="stat-item-clay">
+                        <Heart size={14} className="stat-icon" />
+                        <div className="stat-info">
+                          <span className="stat-label">Likes</span>
+                          <span className="stat-value">{reelData.likes || 'N/A'}</span>
+                        </div>
+                      </div>
+                      <div className="stat-item-clay">
+                        <MessageCircle size={14} className="stat-icon" />
+                        <div className="stat-info">
+                          <span className="stat-label">Comments</span>
+                          <span className="stat-value">{reelData.comments || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quality Selector */}
+                    <div className="quality-selector-container">
+                      <h4 className="quality-title-saas">Select Download Quality</h4>
+                      <div className="quality-grid-saas">
                         
+                        {/* Best Quality Card */}
+                        <div 
+                          className={`clay-card quality-card-saas card-best ${activeQuality === 'BEST' ? 'active' : ''}`} 
+                          onClick={() => handleDownloadQuality('BEST')}
+                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                        >
+                          <span className="quality-badge-saas badge-best">Best</span>
+                          <span className="quality-res-saas">Best Available Quality (1080p)</span>
+                          <div className="quality-meta-info">
+                            <span className="quality-size-saas">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
+                            <span>MP4 Format</span>
+                          </div>
+                        </div>
+
+                        {/* HD Quality Card */}
+                        <div 
+                          className={`clay-card quality-card-saas card-hd ${activeQuality === 'HD' ? 'active' : ''}`} 
+                          onClick={() => handleDownloadQuality('HD')}
+                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                        >
+                          <span className="quality-badge-saas badge-hd">HD</span>
+                          <span className="quality-res-saas">HD Quality (720p)</span>
+                          <div className="quality-meta-info">
+                            <span className="quality-size-saas">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
+                            <span>MP4 Format</span>
+                          </div>
+                        </div>
+
+                        {/* SD Quality Card */}
+                        <div 
+                          className={`clay-card quality-card-saas card-sd ${activeQuality === 'SD' ? 'active' : ''}`} 
+                          onClick={() => handleDownloadQuality('SD')}
+                          style={isDownloading ? { pointerEvents: 'none', opacity: 0.7 } : {}}
+                        >
+                          <span className="quality-badge-saas badge-sd">SD</span>
+                          <span className="quality-res-saas">SD Quality (480p)</span>
+                          <div className="quality-meta-info">
+                            <span className="quality-size-saas">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
+                            <span>MP4 Format</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Actions Group */}
+                    <div className="success-actions">
+                      <div className="download-options-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+                          <button
+                            className="btn-clay btn-clay-secondary"
+                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                            onClick={() => handleCopyCaption(reelData.caption)}
+                          >
+                            <FileText size={16} /> Copy Caption
+                          </button>
+                          
+                          <button
+                            className="btn-clay btn-clay-secondary"
+                            style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
+                            onClick={() => handleCopyHashtags(reelData.caption)}
+                          >
+                            <Sparkles size={16} /> Copy Hashtags
+                          </button>
+                        </div>
                         <button
                           className="btn-clay btn-clay-secondary"
-                          style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', flex: 1 }}
-                          onClick={() => handleCopyHashtags(reelData.caption)}
+                          style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', width: '100%' }}
+                          onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `savetube_fb_${reelData.id || 'video'}_cover.jpg`)}
                         >
-                          <Sparkles size={16} /> Copy Hashtags
+                          <Download size={16} /> Download Cover Image
                         </button>
                       </div>
-                      <button
-                        className="btn-clay btn-clay-secondary"
-                        style={{ padding: '0.75rem 1.2rem', fontSize: '0.9rem', width: '100%' }}
-                        onClick={() => handleDownloadMedia(reelData.thumbnailUrl, `savetube_fb_${reelData.id || 'video'}_cover.jpg`)}
-                      >
-                        <Download size={16} /> Download Cover Image
-                      </button>
-                    </div>
 
-                    <div className="btn-back-container" style={{ marginTop: '0.75rem' }}>
-                      <button 
-                        className="btn-back"
-                        onClick={() => {
-                          setReelData(null);
-                          setUrl('');
-                          setErrorDetails(null);
-                          setDownloadSuccessData(null);
-                        }}
-                      >
-                        <ArrowLeft size={16} /> Extract Another link
-                      </button>
+                      <div className="btn-back-container" style={{ marginTop: '0.75rem' }}>
+                        <button 
+                          className="btn-back"
+                          onClick={() => {
+                            setReelData(null);
+                            setUrl('');
+                            setErrorDetails(null);
+                            setDownloadSuccessData(null);
+                            setActiveQuality('BEST');
+                          }}
+                        >
+                          <ArrowLeft size={16} /> Reset Form
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-          </AnimatePresence>
+              {/* D. SUCCESS DOWNLOAD STATE */}
+              {!isLoading && downloadSuccessData && (
+                <motion.div
+                  key="download-success-view"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  style={{ width: '100%' }}
+                >
+                  <DownloadSuccessScreen 
+                    reelData={downloadSuccessData.reelData}
+                    qualityName={downloadSuccessData.qualityName}
+                    onReset={() => {
+                      setDownloadSuccessData(null);
+                      setReelData(null);
+                      setUrl('');
+                    }}
+                    onViewHistory={() => {
+                      const el = document.getElementById('history-section-anchor');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    onShareApp={handleShareApp}
+                  />
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
