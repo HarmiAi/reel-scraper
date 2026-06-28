@@ -573,7 +573,7 @@ const InstagramDownloader = ({ navigate }) => {
       style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
       <SeoManager 
-        title="Instagram Reel Downloader - Download Insta Reels Online"
+        title="Instagram Reel Downloader | Free & Fast"
         description="Free online tool to download Instagram Reels, videos, and photos in high quality. Save Instagram Reels without watermarks directly to mobile or PC."
         canonicalPath="/instagram"
         schemaData={combinedInstagramSchemas}

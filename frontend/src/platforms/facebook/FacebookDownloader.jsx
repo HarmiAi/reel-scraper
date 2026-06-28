@@ -745,7 +745,7 @@ const FacebookDownloader = ({ navigate }) => {
       style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
       <SeoManager 
-        title="Facebook Reel Downloader - Download Facebook Reels in HD"
+        title="Facebook Reel Downloader | Free & Fast"
         description="Save Facebook Reels and videos online in HD quality for free. Fast online Facebook downloader for mobile and PC with no installation required."
         canonicalPath="/facebook"
         schemaData={combinedFacebookSchemas}
