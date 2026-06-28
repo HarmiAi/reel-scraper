@@ -345,9 +345,13 @@ const FacebookDownloader = ({ navigate }) => {
       updatedHistory = [itemInHistory, ...updatedHistory].slice(0, 20);
       saveHistory(updatedHistory);
 
+      const downloadUrl = (qualityKey === 'SD' && data.sdVideoUrl) 
+        ? data.sdVideoUrl 
+        : ((qualityKey === 'HD' && data.hdVideoUrl) ? data.hdVideoUrl : data.videoUrl);
+
       if (qualityKey === 'SD') {
         // Trigger actual download proxy stream immediately for SD
-        await downloadFacebookFile(data.videoUrl, filename, qualityKey, data.id);
+        await downloadFacebookFile(downloadUrl, filename, qualityKey, data.id);
 
         const counts = {};
         let maxCount = 0;
@@ -647,6 +651,11 @@ const FacebookDownloader = ({ navigate }) => {
     });
   };
 
+  const hasMultipleQualities = !!(reelData && reelData.sdVideoUrl && reelData.hdVideoUrl && (reelData.sdVideoUrl !== reelData.hdVideoUrl));
+  const displaySizeBest = reelData ? (reelData.highSize || calculateSize(reelData.duration, 'BEST')) : '';
+  const displaySizeHD = reelData ? (hasMultipleQualities ? (reelData.mediumSize || calculateSize(reelData.duration, 'HD')) : displaySizeBest) : '';
+  const displaySizeSD = reelData ? (hasMultipleQualities ? (reelData.lowSize || calculateSize(reelData.duration, 'SD')) : displaySizeBest) : '';
+
   const filteredHistory = getFilteredHistory();
 
   return (
@@ -943,7 +952,7 @@ const FacebookDownloader = ({ navigate }) => {
                           <span className="quality-res-saas-premium">High (1080p)</span>
                         </div>
                         <div className="quality-meta-info-premium">
-                          <span className="quality-size-saas-premium">Est. Size: {reelData.highSize || calculateSize(reelData.duration, 'BEST')}</span>
+                          <span className="quality-size-saas-premium">Est. Size: {displaySizeBest}</span>
                           <span className="quality-format-premium">MP4 Format</span>
                         </div>
                       </div>
@@ -959,7 +968,7 @@ const FacebookDownloader = ({ navigate }) => {
                           <span className="quality-res-saas-premium">Medium (720p)</span>
                         </div>
                         <div className="quality-meta-info-premium">
-                          <span className="quality-size-saas-premium">Est. Size: {reelData.mediumSize || calculateSize(reelData.duration, 'HD')}</span>
+                          <span className="quality-size-saas-premium">Est. Size: {displaySizeHD}</span>
                           <span className="quality-format-premium">MP4 Format</span>
                         </div>
                       </div>
@@ -975,11 +984,22 @@ const FacebookDownloader = ({ navigate }) => {
                           <span className="quality-res-saas-premium">Standard (480p)</span>
                         </div>
                         <div className="quality-meta-info-premium">
-                          <span className="quality-size-saas-premium">Est. Size: {reelData.lowSize || calculateSize(reelData.duration, 'SD')}</span>
+                          <span className="quality-size-saas-premium">Est. Size: {displaySizeSD}</span>
                           <span className="quality-format-premium">MP4 Format</span>
                         </div>
                       </div>
                     </div>
+
+                    {!hasMultipleQualities && (
+                      <div className="clay-card info-callout-saas-premium animate-fade-in" style={{ marginTop: '1.25rem', padding: '1rem', background: 'rgba(97, 208, 122, 0.08)', border: '1px dashed rgba(97, 208, 122, 0.4)', borderRadius: 'var(--radius-md)' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', textAlign: 'left' }}>
+                          <Info size={18} style={{ color: 'var(--primary-color)', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            Note: Only the original high-quality stream is available from this source. All options will download the best available quality.
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Actions Group */}
                     <div className="success-actions-premium" style={{ marginTop: '1.5rem' }}>
