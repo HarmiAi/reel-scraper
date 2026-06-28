@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ShieldCheck, Zap, Sparkles } from 'lucide-react';
+import SeoManager from './SeoManager.jsx';
 
 const InstagramIcon = ({ size = 24, className }) => (
   <svg
@@ -56,6 +57,18 @@ const Dashboard = ({ navigate }) => {
     return () => window.removeEventListener('mousemove', handleMascotTilt);
   }, []);
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "The Save Tube",
+    "url": "https://thesavetube.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://thesavetube.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <motion.div
       key="dashboard-view"
@@ -64,6 +77,12 @@ const Dashboard = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
+      <SeoManager 
+        title="Free Instagram & Facebook Reel Downloader Online"
+        description="Download Instagram Reels, Facebook Reels, and videos online for free. Save high-quality MP4 files directly to your device without watermarks."
+        canonicalPath="/"
+        schemaData={websiteSchema}
+      />
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-badge">

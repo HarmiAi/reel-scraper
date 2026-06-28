@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, MessageSquare, Send, Check, User, Clock, ShieldCheck, AlertCircle, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SeoManager from './SeoManager.jsx';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -99,6 +100,25 @@ const Contact = ({ navigate }) => {
     }
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://thesavetube.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Contact Us",
+        "item": "https://thesavetube.com/contact"
+      }
+    ]
+  };
+
   return (
     <motion.div 
       className="page-container"
@@ -107,6 +127,12 @@ const Contact = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4 }}
     >
+      <SeoManager 
+        title="Contact The Save Tube - Get in Touch"
+        description="Have questions, feedback, or business inquiries? Contact The Save Tube support team. We reply within 24 hours."
+        canonicalPath="/contact"
+        schemaData={breadcrumbSchema}
+      />
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '1.5rem' }}>
         <button className="btn-back btn-clay btn-clay-secondary" style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-full)' }} onClick={() => navigate('/')}>
           <ArrowLeft size={14} /> Back to Dashboard

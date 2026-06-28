@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Home, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SeoManager from './SeoManager.jsx';
 
 const NotFound = ({ navigate }) => {
   const containerVariants = {
@@ -35,6 +36,12 @@ const NotFound = ({ navigate }) => {
       initial="hidden"
       animate="visible"
     >
+      <SeoManager 
+        title="Page Not Found"
+        description="The requested page could not be found. Navigate back to download Instagram and Facebook Reels."
+        canonicalPath="/404"
+        robots="noindex, nofollow"
+      />
       <div className="clay-card page-card not-found-layout" style={{ maxWidth: '580px', margin: '2rem auto' }}>
         
         {/* Animated Icon Circle */}
@@ -70,6 +77,16 @@ const NotFound = ({ navigate }) => {
           >
             <Home size={16} /> Home
           </button>
+        </motion.div>
+
+        {/* Quick Links for Users & Crawlers */}
+        <motion.div variants={itemVariants} style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px dashed rgba(0,0,0,0.06)', width: '100%', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Popular Resources</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem 1.5rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700 }} onClick={() => navigate('/instagram')}>Instagram Downloader</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700 }} onClick={() => navigate('/facebook')}>Facebook Downloader</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700 }} onClick={() => navigate('/blog')}>Creator Blog Guides</span>
+          </div>
         </motion.div>
         
       </div>

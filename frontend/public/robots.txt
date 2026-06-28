@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /temp/
+
+Sitemap: https://thesavetube.com/sitemap.xml

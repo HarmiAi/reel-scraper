@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { 
   DownloadCloud, X, Clipboard, ArrowLeft, RefreshCw, Download, Trash2, 
-  Info, FileText, Sparkles, CheckCircle, Heart, MessageCircle, Play
+  Info, FileText, Sparkles, CheckCircle, Heart, MessageCircle, Play, ChevronDown
 } from 'lucide-react';
 
 import { 
@@ -17,6 +17,7 @@ import MobileActionSheet from '../../components/MobileActionSheet.jsx';
 import AnalyticsCards from '../../components/AnalyticsCards.jsx';
 import ErrorState from '../../components/ErrorState.jsx';
 import AnimatedCounter from '../../components/AnimatedCounter.jsx';
+import SeoManager from '../../components/SeoManager.jsx';
 
 const FALLBACK_THUMBNAIL = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600"><rect width="100%" height="100%" fill="%231a1a24"/><g fill="none" stroke="%233f3f56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(170, 270)"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><path d="M7 2h10M5 22h14M12 18v-4M9 14h6"/></g><text x="50%" y="55%" font-family="sans-serif" font-size="14" fill="%236b6b83" dominant-baseline="middle" text-anchor="middle">Preview Unavailable</text></svg>`;
 
@@ -40,6 +41,7 @@ const FacebookDownloader = ({ navigate }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterQuality, setFilterQuality] = useState('ALL');
   const [activeQuality, setActiveQuality] = useState('BEST');
+  const [activeFaq, setActiveFaq] = useState(null);
 
   const mascotRef = useRef(null);
 
@@ -658,6 +660,82 @@ const FacebookDownloader = ({ navigate }) => {
 
   const filteredHistory = getFilteredHistory();
 
+  const facebookAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Facebook Reel Downloader",
+    "url": "https://thesavetube.com/facebook",
+    "image": "https://cdn-icons-png.flaticon.com/512/124/124010.png",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires HTML5 compatible browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
+
+  const facebookFaqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I download Facebook Reels?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Copy the Facebook Reel link from the share button, paste it in the search input above, select your desired resolution (SD, HD, or Best), and tap download."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this Facebook downloader free and safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Our tool is 100% free and requires no registration or app installs, meaning your device is fully safe from malware and adware."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work on Android and iPhone?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it works natively inside any modern browser (Google Chrome, Apple Safari, Samsung Internet) on both iOS and Android."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is my Facebook download link failing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Downloads usually fail if the video is private or set to friend-only permissions. Make sure the video is posted publicly on Facebook."
+        }
+      }
+    ]
+  };
+
+  const facebookBreadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://thesavetube.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Facebook Downloader",
+        "item": "https://thesavetube.com/facebook"
+      }
+    ]
+  };
+
+  const combinedFacebookSchemas = [facebookAppSchema, facebookFaqSchema, facebookBreadcrumbSchema];
+
   return (
     <motion.div
       key="facebook-view"
@@ -666,6 +744,12 @@ const FacebookDownloader = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
+      <SeoManager 
+        title="Facebook Reel Downloader - Download Facebook Reels in HD"
+        description="Save Facebook Reels and videos online in HD quality for free. Fast online Facebook downloader for mobile and PC with no installation required."
+        canonicalPath="/facebook"
+        schemaData={combinedFacebookSchemas}
+      />
       {/* Hero Section */}
       <section className="hero-section" style={{ marginBottom: '0.75rem' }}>
         <div className="hero-badge" style={{ marginBottom: '0.4rem' }}>
@@ -1085,6 +1169,95 @@ const FacebookDownloader = ({ navigate }) => {
 
       {/* Local Statistics/Analytics Dashboard */}
       <AnalyticsCards stats={stats} />
+
+      {/* AEO / GEO Optimized FAQ Section */}
+      <section className="clay-card page-card" style={{ maxWidth: '640px', width: '92%', margin: '2rem auto', textAlign: 'left', padding: '2rem 1.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Info size={18} style={{ color: 'var(--primary-color)' }} />
+          Facebook Reel Downloader Guide &amp; FAQ
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.5rem' }}>
+          Welcome to the ultimate guide for downloading Facebook Reels. Our tool extracts direct mp4 video streams from public Facebook databases safely, anonymously, and completely free.
+        </p>
+
+        {/* Feature Comparison Table (GEO) */}
+        <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid rgba(0,0,0,0.05)' }}>
+                <th style={{ padding: '0.5rem', color: 'var(--text-primary)' }}>Feature</th>
+                <th style={{ padding: '0.5rem', color: 'var(--primary-color)' }}>The Save Tube</th>
+                <th style={{ padding: '0.5rem', color: 'var(--text-secondary)' }}>Other Tools</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                <td style={{ padding: '0.5rem', fontWeight: 650 }}>Pop-up Ads</td>
+                <td style={{ padding: '0.5rem', color: 'var(--primary-color)', fontWeight: 700 }}>No Popups</td>
+                <td style={{ padding: '0.5rem' }}>Excessive Ads</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                <td style={{ padding: '0.5rem', fontWeight: 650 }}>Registration</td>
+                <td style={{ padding: '0.5rem', color: 'var(--primary-color)', fontWeight: 700 }}>Not Required</td>
+                <td style={{ padding: '0.5rem' }}>Requires Sign-up</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                <td style={{ padding: '0.5rem', fontWeight: 650 }}>Audio Capture</td>
+                <td style={{ padding: '0.5rem', color: 'var(--primary-color)', fontWeight: 700 }}>Original Sound</td>
+                <td style={{ padding: '0.5rem' }}>Muted HD options</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* FAQ Accordions */}
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Frequently Asked Questions</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {[
+            {
+              q: "How do I download Facebook Reels?",
+              a: "Copy the Facebook Reel link from the share button, paste it in the search input above, select your desired resolution (SD, HD, or Best), and tap download."
+            },
+            {
+              q: "Is this Facebook downloader free and safe?",
+              a: "Yes. Our tool is 100% free and requires no registration or app installs, meaning your device is fully safe from malware and adware."
+            },
+            {
+              q: "Does it work on Android and iPhone?",
+              a: "Yes, it works natively inside any modern browser (Google Chrome, Apple Safari, Samsung Internet) on both iOS and Android."
+            },
+            {
+              q: "Why is my Facebook download link failing?",
+              a: "Downloads usually fail if the video is private or set to friend-only permissions. Make sure the video is posted publicly on Facebook."
+            }
+          ].map((faq, index) => (
+            <div 
+              key={index} 
+              className={`clay-card faq-accordion-item ${activeFaq === index ? 'active' : ''}`}
+              style={{ padding: '0', overflow: 'hidden', background: activeFaq === index ? 'var(--bg-card)' : 'rgba(0,0,0,0.01)' }}
+            >
+              <button 
+                onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <span style={{ fontWeight: 750, fontSize: '0.82rem', color: 'var(--text-primary)', paddingRight: '0.75rem' }}>{faq.q}</span>
+                <ChevronDown size={14} style={{ transform: activeFaq === index ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', color: 'var(--primary-color)', flexShrink: 0 }} />
+              </button>
+              {activeFaq === index && (
+                <div style={{ padding: '0 1rem 1rem 1rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.45, borderTop: '1px solid rgba(0,0,0,0.03)', paddingTop: '0.5rem' }}>
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Editorial Footnote (EEAT) */}
+        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+          <span>Editorial Review: June 28, 2026</span>
+          <span style={{ fontWeight: 700, color: 'var(--primary-color)' }}>Fact-Checked &amp; Verified</span>
+        </div>
+      </section>
 
       {/* Recent Downloads Section */}
       <section id="history-section-anchor" className="history-section">

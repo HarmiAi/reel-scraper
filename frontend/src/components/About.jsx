@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Users, ShieldCheck, Zap, Globe, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SeoManager from './SeoManager.jsx';
 
 const About = ({ navigate }) => {
   // Stagger animation container
@@ -20,6 +21,25 @@ const About = ({ navigate }) => {
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } },
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://thesavetube.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "About Us",
+        "item": "https://thesavetube.com/about"
+      }
+    ]
+  };
+
   return (
     <motion.div 
       className="page-container"
@@ -28,6 +48,12 @@ const About = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4 }}
     >
+      <SeoManager 
+        title="About The Save Tube - Our Mission & Story"
+        description="Learn more about The Save Tube, our free high-speed video downloader tool, and our mission to provide clean, ad-free online media extraction services."
+        canonicalPath="/about"
+        schemaData={breadcrumbSchema}
+      />
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '1.5rem' }}>
         <button className="btn-back btn-clay btn-clay-secondary" style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-full)' }} onClick={() => navigate('/')}>
           <ArrowLeft size={14} /> Back to Dashboard

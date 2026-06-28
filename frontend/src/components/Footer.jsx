@@ -19,6 +19,12 @@ const Footer = ({ navigate, currentPath }) => {
             About Us
           </button>
           <button 
+            className={`footer-btn-link ${currentPath.startsWith('/blog') ? 'active' : ''}`}
+            onClick={() => navigate('/blog')}
+          >
+            Blog
+          </button>
+          <button 
             className={`footer-btn-link ${currentPath === '/contact' ? 'active' : ''}`}
             onClick={() => navigate('/contact')}
           >

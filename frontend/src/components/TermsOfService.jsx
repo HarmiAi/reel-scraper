@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, FileText, CheckCircle, AlertTriangle, AlertCircle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SeoManager from './SeoManager.jsx';
 
 const TermsOfService = ({ navigate }) => {
   const [activeSection, setActiveSection] = useState('section1');
@@ -21,6 +22,11 @@ const TermsOfService = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4 }}
     >
+      <SeoManager 
+        title="Terms of Service - The Save Tube"
+        description="Read our terms of service and conditions of use. Learn about the rules, permissions, and copyright regulations for downloading media."
+        canonicalPath="/terms-of-service"
+      />
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '1.5rem' }}>
         <button className="btn-back btn-clay btn-clay-secondary" style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-full)' }} onClick={() => navigate('/')}>
           <ArrowLeft size={14} /> Back to Dashboard

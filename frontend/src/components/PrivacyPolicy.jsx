@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Shield, EyeOff, Cpu, Info, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import SeoManager from './SeoManager.jsx';
 
 const PrivacyPolicy = ({ navigate }) => {
   const [activeSection, setActiveSection] = useState('section1');
@@ -21,6 +22,11 @@ const PrivacyPolicy = ({ navigate }) => {
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4 }}
     >
+      <SeoManager 
+        title="Privacy Policy - The Save Tube"
+        description="Read our privacy policy to understand how we collect, protect, and handle your data. The Save Tube values user security and data privacy."
+        canonicalPath="/privacy-policy"
+      />
       <div className="btn-back-container" style={{ alignSelf: 'flex-start', marginBottom: '1.5rem' }}>
         <button className="btn-back btn-clay btn-clay-secondary" style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-full)' }} onClick={() => navigate('/')}>
           <ArrowLeft size={14} /> Back to Dashboard

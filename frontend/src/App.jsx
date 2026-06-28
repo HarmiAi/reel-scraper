@@ -1,20 +1,44 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import React, { useEffect, Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-
-// Components
-import About from './components/About.jsx';
-import Contact from './components/Contact.jsx';
-import PrivacyPolicy from './components/PrivacyPolicy.jsx';
-import TermsOfService from './components/TermsOfService.jsx';
+import { HelmetProvider } from 'react-helmet-async';
 import Footer from './components/Footer.jsx';
-import Dashboard from './components/Dashboard.jsx';
-import NotFound from './components/NotFound.jsx';
 
-// Platforms Downloader Components
-import FacebookDownloader from './platforms/facebook/FacebookDownloader.jsx';
-import InstagramDownloader from './platforms/instagram/InstagramDownloader.jsx';
+// Lazy-loaded Views
+const About = lazy(() => import('./components/About.jsx'));
+const Contact = lazy(() => import('./components/Contact.jsx'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy.jsx'));
+const TermsOfService = lazy(() => import('./components/TermsOfService.jsx'));
+const Dashboard = lazy(() => import('./components/Dashboard.jsx'));
+const NotFound = lazy(() => import('./components/NotFound.jsx'));
+const BlogHub = lazy(() => import('./components/BlogHub.jsx'));
+const BlogPost = lazy(() => import('./components/BlogPost.jsx'));
+const FacebookDownloader = lazy(() => import('./platforms/facebook/FacebookDownloader.jsx'));
+const InstagramDownloader = lazy(() => import('./platforms/instagram/InstagramDownloader.jsx'));
+
+// Animated Page Loader Fallback
+const PageLoader = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', gap: '1rem' }}>
+    <motion.div 
+      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 1, 0.3] }}
+      transition={{ repeat: Infinity, duration: 1.5 }}
+      style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color) 0%, rgba(97, 208, 122, 0.4) 100%)', boxShadow: 'var(--shadow-surface-active)' }}
+    />
+    <span style={{ fontSize: '0.8rem', fontWeight: 650, color: 'var(--text-secondary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+      Loading Resource
+    </span>
+  </div>
+);
+
+const BlogPostWrapper = ({ navigate }) => {
+  const { slug } = useParams();
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <BlogPost slug={slug} navigate={navigate} />
+    </Suspense>
+  );
+};
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -62,25 +86,31 @@ const AppContent = () => {
         </header>
 
         {/* Dynamic Route View Switching */}
-        <main style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <main className="main-content">
           <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<Dashboard navigate={navigate} />} />
-              <Route path="/facebook" element={<FacebookDownloader navigate={navigate} />} />
-              <Route path="/instagram" element={<InstagramDownloader navigate={navigate} />} />
-              <Route path="/about" element={<About navigate={navigate} />} />
-              <Route path="/contact" element={<Contact navigate={navigate} />} />
-              
-              {/* Privacy and Terms routes + aliases */}
-              <Route path="/privacy" element={<PrivacyPolicy navigate={navigate} />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy navigate={navigate} />} />
-              
-              <Route path="/terms" element={<TermsOfService navigate={navigate} />} />
-              <Route path="/terms-of-service" element={<TermsOfService navigate={navigate} />} />
+            <Suspense fallback={<PageLoader />}>
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<Dashboard navigate={navigate} />} />
+                <Route path="/facebook" element={<FacebookDownloader navigate={navigate} />} />
+                <Route path="/instagram" element={<InstagramDownloader navigate={navigate} />} />
+                <Route path="/about" element={<About navigate={navigate} />} />
+                <Route path="/contact" element={<Contact navigate={navigate} />} />
+                
+                {/* Privacy and Terms routes + aliases */}
+                <Route path="/privacy" element={<PrivacyPolicy navigate={navigate} />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy navigate={navigate} />} />
+                
+                <Route path="/terms" element={<TermsOfService navigate={navigate} />} />
+                <Route path="/terms-of-service" element={<TermsOfService navigate={navigate} />} />
 
-              {/* Wildcard 404 handler */}
-              <Route path="*" element={<NotFound navigate={navigate} />} />
-            </Routes>
+                {/* Blog routes */}
+                <Route path="/blog" element={<BlogHub navigate={navigate} />} />
+                <Route path="/blog/:slug" element={<BlogPostWrapper navigate={navigate} />} />
+
+                {/* Wildcard 404 handler */}
+                <Route path="*" element={<NotFound navigate={navigate} />} />
+              </Routes>
+            </Suspense>
           </AnimatePresence>
         </main>
 
@@ -93,9 +123,11 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </HelmetProvider>
   );
 };
 
