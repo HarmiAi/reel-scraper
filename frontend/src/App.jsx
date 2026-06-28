@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
@@ -15,23 +16,14 @@ import NotFound from './components/NotFound.jsx';
 import FacebookDownloader from './platforms/facebook/FacebookDownloader.jsx';
 import InstagramDownloader from './platforms/instagram/InstagramDownloader.jsx';
 
-const App = () => {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+const AppContent = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Synchronize path transitions with browser back/forward buttons
+  // Scroll to top on route change
   useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const navigate = (path) => {
-    window.history.pushState(null, '', path);
-    setCurrentPath(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [location.pathname]);
 
   return (
     <div className="app-root-container">
@@ -72,52 +64,38 @@ const App = () => {
         {/* Dynamic Route View Switching */}
         <main style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <AnimatePresence mode="wait">
-            {currentPath === '/about' && (
-              <About key="about" navigate={navigate} />
-            )}
-            
-            {currentPath === '/contact' && (
-              <Contact key="contact" navigate={navigate} />
-            )}
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<Dashboard navigate={navigate} />} />
+              <Route path="/facebook" element={<FacebookDownloader navigate={navigate} />} />
+              <Route path="/instagram" element={<InstagramDownloader navigate={navigate} />} />
+              <Route path="/about" element={<About navigate={navigate} />} />
+              <Route path="/contact" element={<Contact navigate={navigate} />} />
+              
+              {/* Privacy and Terms routes + aliases */}
+              <Route path="/privacy" element={<PrivacyPolicy navigate={navigate} />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy navigate={navigate} />} />
+              
+              <Route path="/terms" element={<TermsOfService navigate={navigate} />} />
+              <Route path="/terms-of-service" element={<TermsOfService navigate={navigate} />} />
 
-            {(currentPath === '/privacy' || currentPath === '/privacy-policy') && (
-              <PrivacyPolicy key="privacy" navigate={navigate} />
-            )}
-
-            {(currentPath === '/terms' || currentPath === '/terms-of-service') && (
-              <TermsOfService key="terms" navigate={navigate} />
-            )}
-
-            {currentPath === '/' && (
-              <Dashboard key="dashboard" navigate={navigate} />
-            )}
-
-            {currentPath === '/facebook' && (
-              <FacebookDownloader key="facebook" navigate={navigate} />
-            )}
-
-            {currentPath === '/instagram' && (
-              <InstagramDownloader key="instagram" navigate={navigate} />
-            )}
-
-            {currentPath !== '/' && 
-             currentPath !== '/instagram' && 
-             currentPath !== '/facebook' && 
-             currentPath !== '/about' && 
-             currentPath !== '/contact' && 
-             currentPath !== '/privacy' && 
-             currentPath !== '/privacy-policy' && 
-             currentPath !== '/terms' && 
-             currentPath !== '/terms-of-service' && (
-              <NotFound key="404-page" navigate={navigate} />
-            )}
+              {/* Wildcard 404 handler */}
+              <Route path="*" element={<NotFound navigate={navigate} />} />
+            </Routes>
           </AnimatePresence>
         </main>
 
         {/* Global Footer */}
-        <Footer navigate={navigate} currentPath={currentPath} />
+        <Footer navigate={navigate} currentPath={location.pathname} />
       </div>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 };
 
