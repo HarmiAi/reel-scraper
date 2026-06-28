@@ -71,7 +71,7 @@ const BlogHub = ({ navigate }) => {
     >
       <SeoManager 
         title="The Save Tube Blog - Free Video Downloader Guides"
-        description="Read tutorials, step-by-step guides, and tips on downloading Facebook Reels and Instagram Reels offline."
+        description="Read tutorials, step-by-step guides, and tips on downloading Facebook Reels and Instagram Reels offline. Get expert media tips on The Save Tube today."
         canonicalPath="/blog"
       />
 

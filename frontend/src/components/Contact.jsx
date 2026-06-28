@@ -129,7 +129,7 @@ const Contact = ({ navigate }) => {
     >
       <SeoManager 
         title="Contact The Save Tube - Get in Touch"
-        description="Have questions, feedback, or business inquiries? Contact The Save Tube support team. We reply within 24 hours."
+        description="Have questions, feedback, or advertising inquiries? Contact The Save Tube editorial support team today. We reply to all messages within 24 hours."
         canonicalPath="/contact"
         schemaData={breadcrumbSchema}
       />

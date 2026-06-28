@@ -38,7 +38,7 @@ const NotFound = ({ navigate }) => {
     >
       <SeoManager 
         title="Page Not Found"
-        description="The requested page could not be found. Navigate back to download Instagram and Facebook Reels."
+        description="Oops! The page you are looking for does not exist on The Save Tube. Navigate back to our home page to download Instagram and Facebook Reels for free."
         canonicalPath="/404"
         robots="noindex, nofollow"
       />
